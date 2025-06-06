@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CompoundWl</string>
+    <string name="title_activity_surface_view">SurfaceViewActivity</string>
+</resources>
