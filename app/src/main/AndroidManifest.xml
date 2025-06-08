@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CompoundWl"
         tools:targetApi="31">
+        <service
+            android:name=".SurfaceService"
+            android:enabled="true"
+            android:exported="false" />
+
         <activity
             android:name=".ui.theme.SurfaceViewActivity"
             android:exported="false"
@@ -20,7 +25,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.CompoundWl">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
