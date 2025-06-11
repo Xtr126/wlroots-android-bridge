@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "CompoundWl"
 include(":app")
- 
+include(":app:tinywl")
