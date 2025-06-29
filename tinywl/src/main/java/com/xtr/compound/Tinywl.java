@@ -8,13 +8,13 @@ import com.termux.termuxam.Am;
 
 public class Tinywl {
     private static final String TAG = "Tinywl";
-    static {
-       System.loadLibrary("tinywl");
-    }
+
     private static native void onSurfaceCreated(Surface surface);
 
     public static void main(String[] args) {
         try {
+            new ProcessBuilder("logcat", "-v", "color", "--pid=" + android.os.Process.myPid()).inheritIO().start();
+            System.loadLibrary("tinywl");
             Looper.prepare();
             // 1. Create your Parcelable object (example: Bundle)
             Bundle data = new Bundle();
