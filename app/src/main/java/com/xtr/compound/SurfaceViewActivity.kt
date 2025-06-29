@@ -1,4 +1,4 @@
-package com.xtr.compound.ui.theme
+package com.xtr.compound
 
 import android.content.ComponentName
 import android.content.Intent
@@ -9,7 +9,6 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
-import com.xtr.compound.SurfaceService
 
 class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
     var appId: String? = null

@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "CompoundWl"
 include(":app")
-include(":app:tinywl")
+include(":TermuxAm")
+include(":tinywl")

@@ -1,21 +1,24 @@
 package com.xtr.compound
 
+import android.os.Build
 import android.os.Bundle
+import android.os.Parcel
+import android.util.Base64
+import android.view.SurfaceHolder
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.xtr.compound.ui.theme.CompoundWlTheme
 
-class MainActivity : ComponentActivity() {
+
+class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
+    private var mCallback: ITinywlCallback? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+/*
         enableEdgeToEdge()
         setContent {
             CompoundWlTheme {
@@ -27,6 +30,33 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+*/
+        intent?.getBundleExtra("bundle")
+            ?.getBinder("callback")
+            ?.let {
+                mCallback = ITinywlCallback.Stub.asInterface(it)
+            }
+
+
+        window.takeSurface(this)
+    }
+
+    override fun surfaceRedrawNeeded(holder: SurfaceHolder) {
+    }
+
+    override fun surfaceCreated(holder: SurfaceHolder) {
+        mCallback?.onSurfaceCreated(holder.surface)
+    }
+
+    override fun surfaceChanged(
+        holder: SurfaceHolder,
+        format: Int,
+        width: Int,
+        height: Int
+    ) {
+    }
+
+    override fun surfaceDestroyed(holder: SurfaceHolder) {
     }
 }
 

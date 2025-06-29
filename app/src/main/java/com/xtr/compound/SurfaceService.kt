@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.view.Surface
-import com.xtr.compound.ui.theme.SurfaceViewActivity
+import com.xtr.compound.SurfaceViewActivity
 
 class SurfaceService : Service() {
 
@@ -57,10 +57,10 @@ class SurfaceService : Service() {
                 xdgTopLevel.surface = surface
         // Now surface is available, call to wlroots and make it render to it
     }
-
-
+    
     fun onSurfaceChanged(format: Int, width: Int, height: Int) {
         // Call to wlroots and resize xdg toplevel now
+
     }
 
     /**

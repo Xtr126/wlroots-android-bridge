@@ -18,7 +18,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".ui.theme.SurfaceViewActivity"
+            android:name=".SurfaceViewActivity"
             android:exported="false"
             android:label="@string/title_activity_surface_view"
             android:theme="@style/Theme.CompoundWl" />
