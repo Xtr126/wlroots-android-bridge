@@ -15,6 +15,7 @@ public class Tinywl {
         try {
             new ProcessBuilder("logcat", "-v", "color", "--pid=" + android.os.Process.myPid()).inheritIO().start();
             System.loadLibrary("tinywl");
+            System.loadLibrary("tinywl_server");
             Looper.prepare();
             // 1. Create your Parcelable object (example: Bundle)
             Bundle data = new Bundle();
@@ -25,7 +26,7 @@ public class Tinywl {
                 }
             });
 
-            Integer exitCode = new Am(data, "bundle").run(new String[]{"start-activity", "com.xtr.compound/.MainActivity", "--activity-clear-task"});
+            Integer exitCode = new Am(data, "bundle").run(new String[]{"start-activity", "-n", "com.xtr.compound/.MainActivity", "--activity-clear-task"});
             Looper.loop();
         } catch (Exception e) {
             e.printStackTrace(System.out);
