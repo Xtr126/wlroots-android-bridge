@@ -1,9 +1,7 @@
 package com.xtr.compound
 
-import android.os.Build
 import android.os.Bundle
-import android.os.Parcel
-import android.util.Base64
+import android.os.IBinder
 import android.view.SurfaceHolder
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.Text
@@ -15,6 +13,7 @@ import com.xtr.compound.ui.theme.CompoundWlTheme
 
 class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
     private var mCallback: ITinywlCallback? = null
+    private val deathRecipient: IBinder.DeathRecipient = IBinder.DeathRecipient { runOnUiThread { this.finish() } }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,8 +36,14 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
                 mCallback = ITinywlCallback.Stub.asInterface(it)
             }
 
+        mCallback?.asBinder()?.linkToDeath(deathRecipient, 0)
 
         window.takeSurface(this)
+    }
+
+    override fun onDestroy() {
+        mCallback?.asBinder()?.unlinkToDeath(deathRecipient, 0)
+        super.onDestroy()
     }
 
     override fun surfaceRedrawNeeded(holder: SurfaceHolder) {
