@@ -34,9 +34,9 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
             ?.getBinder("callback")
             ?.let {
                 mCallback = ITinywlCallback.Stub.asInterface(it)
+                mCallback?.asBinder()?.linkToDeath(deathRecipient, 0)
             }
 
-        mCallback?.asBinder()?.linkToDeath(deathRecipient, 0)
 
         window.takeSurface(this)
     }
