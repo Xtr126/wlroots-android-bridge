@@ -8,6 +8,8 @@ import com.termux.termuxam.Am;
 
 public class Tinywl {
     private static final String TAG = "Tinywl";
+    public static final String EXTRA_KEY = "bundle";
+    public static final String BINDER_KEY = "callback";
 
     private static native int onSurfaceCreated(Surface surface);
 
@@ -18,14 +20,16 @@ public class Tinywl {
             Looper.prepare();
             // 1. Create your Parcelable object (example: Bundle)
             Bundle data = new Bundle();
-            data.putBinder("callback", new ITinywlCallback.Stub() {
+            data.putBinder(BINDER_KEY, new ITinywlCallback.Stub() {
                 @Override
                 public void onSurfaceCreated(Surface surface) {
-                    Tinywl.onSurfaceCreated(surface);
+                    new Thread(() -> {
+                        Tinywl.onSurfaceCreated(surface);
+                    }).start();
                 }
             });
 
-            Integer exitCode = new Am(data, "bundle").run(new String[]{"start-activity", "-n", "com.xtr.compound/.MainActivity", "--activity-clear-task"});
+            Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-activity", "-n", "com.xtr.compound/.MainActivity", "--activity-clear-task"});
             Looper.loop();
         } catch (Exception e) {
             e.printStackTrace(System.out);

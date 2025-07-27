@@ -25,8 +25,8 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
 
     override fun onStart() {
         super.onStart()
-        intent?.getBundleExtra("bundle")
-            ?.getBinder("callback")
+        intent?.getBundleExtra(Tinywl.EXTRA_KEY)
+            ?.getBinder(Tinywl.BINDER_KEY)
             ?.let {
                 mCallback = ITinywlCallback.Stub.asInterface(it)
                 mCallback?.asBinder()?.linkToDeath(deathRecipient, 0)
