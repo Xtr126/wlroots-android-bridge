@@ -4,11 +4,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.view.SurfaceHolder
 import androidx.activity.ComponentActivity
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.xtr.compound.ui.theme.CompoundWlTheme
 
 
 class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
@@ -29,8 +24,9 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
             ?.getBinder(Tinywl.BINDER_KEY)
             ?.let {
                 mCallback = ITinywlCallback.Stub.asInterface(it)
-                mCallback?.asBinder()?.linkToDeath(deathRecipient, 0)
-                window.takeSurface(this)
+                mCallback?.asBinder()?.linkToDeath(deathRecipient, 0).also {
+                    window.takeSurface(this)
+                }
             }
     }
 
