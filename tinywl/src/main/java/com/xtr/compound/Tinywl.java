@@ -1,6 +1,7 @@
 package com.xtr.compound;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.view.Surface;
 
@@ -17,15 +18,13 @@ public class Tinywl {
         try {
             new ProcessBuilder("logcat", "-v", "color", "--pid=" + android.os.Process.myPid()).inheritIO().start();
             System.loadLibrary("tinywl");
-            Looper.prepare();
+            Looper.prepareMainLooper();
             // 1. Create your Parcelable object (example: Bundle)
             Bundle data = new Bundle();
             data.putBinder(BINDER_KEY, new ITinywlCallback.Stub() {
                 @Override
                 public void onSurfaceCreated(Surface surface) {
-                    new Thread(() -> {
-                        Tinywl.onSurfaceCreated(surface);
-                    }).start();
+                    new Handler(Looper.getMainLooper()).post(() -> Tinywl.onSurfaceCreated(surface));
                 }
             });
 
