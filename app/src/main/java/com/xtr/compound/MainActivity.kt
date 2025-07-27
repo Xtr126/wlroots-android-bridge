@@ -13,32 +13,25 @@ import com.xtr.compound.ui.theme.CompoundWlTheme
 
 class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
     private var mCallback: ITinywlCallback? = null
-    private val deathRecipient: IBinder.DeathRecipient = IBinder.DeathRecipient { runOnUiThread { this.finish() } }
+
+    private val deathRecipient: IBinder.DeathRecipient = IBinder.DeathRecipient {
+        mCallback = null
+        runOnUiThread { this.finish() }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-/*
-        enableEdgeToEdge()
-        setContent {
-            CompoundWlTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
-*/
+    }
+
+    override fun onStart() {
+        super.onStart()
         intent?.getBundleExtra("bundle")
             ?.getBinder("callback")
             ?.let {
                 mCallback = ITinywlCallback.Stub.asInterface(it)
                 mCallback?.asBinder()?.linkToDeath(deathRecipient, 0)
+                window.takeSurface(this)
             }
-
-
-        window.takeSurface(this)
     }
 
     override fun onDestroy() {
@@ -62,21 +55,5 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CompoundWlTheme {
-        Greeting("Android")
     }
 }
