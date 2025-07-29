@@ -12,18 +12,23 @@ Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly 
 # What works now
 28-07-2025: Finally vkcube renders at fluid 60fps without any color/image representation issues, after figuring out to use header from minigbm (cros_gralloc_handle.h) to extract pixel format, stride, offset, planes and other attributes from allocated AHardwareBuffer.
 
-# Overview
-* The Activity receives IBinder remote callback object from bundle when it is started by Tinywl.java, then it callbacks to Tinywl.java as soon as the surface is created. Then, Tinywl.java calls C/C++ code  in libtinywl.so through JNI built from [tinywl-ANativeWindow](https://github.com/Xtr126/tinywl-ANativeWindow) which starts the tinywl server with a reference to Surface passed through. tinywl-ANativeWindow converts java surface to ANativeWindow.
+# How it works
+* The Activity receives IBinder remote callback object from bundle when it is started by Tinywl.java, then it callbacks to Tinywl.java as soon as the surface is created. Then, Tinywl.java calls C/C++ code  in libtinywl.so through JNI (libtinywl is built from [tinywl-ANativeWindow](https://github.com/Xtr126/tinywl-ANativeWindow) which starts the tinywl server with a reference to (java)Surface passed through to native code. It creates NDK ANativeWindow from JNI Surface object.
 * [TermuxAm](https://github.com/termux/TermuxAm/) is modified and used as a module to launch the activity of our app from app_process with intent containing bundle with IBinder AIDL callback object
 * `tinywl` module has the code that runs in termux as a cli application in external process (app_process). It has an entry point like a standalone Java application called from cli with args. It takes care of launching the activity and passing the Surface to tinywl.
-* tinywl.c/libtinywl.so built with the app is just a stub library, libtinywl.so from https://github.com/Xtr126/tinywl-ANativeWindow is used instead.
+* tinywl.c/libtinywl.so built with the app is just a placeholder, libtinywl.so from https://github.com/Xtr126/tinywl-ANativeWindow is used instead.
 * Termux is used since it handles the dependencies of wlroots/mesa/wayland for us.
+  
 # Build 
     # Build in termux environment
     git clone https://github.com/Xtr126/tinywl-ANativeWindow
     cd tinywl-ANativeWindow
     make
-    # Running tinywl
+# Usage
+Install the Android app.  
+Install wlroots and mesa packages from [Xtr126/termux-packages](https://github.com/Xtr126/termux-packages/releases/tag/wlroots-0.18).  
+Then run the following command in tinywl-ANativeWindow director.
+
     /system/bin/app_process -Djava.library.path=./:/system/lib64 -Djava.class.path=$(pm path com.xtr.compound  | cut -d ':' -f 2) / com.xtr.compound.Tinywl 
 
 ## Acknowledgments
@@ -32,3 +37,5 @@ Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly 
 * [TermuxAm](https://github.com/termux/TermuxAm/)
 * [wlroots and tinywl](https://gitlab.freedesktop.org/wlroots/wlroots)
 * https://github.com/termux/termux-packages/pull/19587
+* [minigbm(cros_gralloc_handle.h)](http://android.googlesource.com/platform/external/minigbm/) 
+* [gralloc_handle from libdrm for gbm gralloc](https://gitlab.freedesktop.org/mesa/libdrm) 
