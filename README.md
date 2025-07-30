@@ -15,16 +15,30 @@ Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly 
 * `tinywl` module has the code that runs in termux as a cli application in external process (app_process). It has an entry point like a standalone Java application called from cli with args. It takes care of launching the activity and passing the Surface to tinywl.
 * tinywl.c/libtinywl.so built with the app is just a placeholder, libtinywl.so from https://github.com/Xtr126/tinywl-ANativeWindow is used instead.
 * Termux is used since it handles the dependencies of wlroots/mesa/wayland for us.
-  
+
+## Roadmap
+
+- [x] Vulkan/OpenGL acceleration for clients in chroot and Termux  
+- [x] Display fullscreen output without any glitches
+- [ ] Display individual wayland apps in resizeable Android windows 
+- [ ] Send input events from Android client app to wlroots
+    - [ ] Keyboard+Mouse 
+    - [ ] Mouse capture/lock 
+    - [ ] Touchscreen
+    - [ ] Stylus
+    - [ ] Gamepads
+- [ ] LXC/chroot integration
+
 # Build 
     # Build in termux environment
     git clone https://github.com/Xtr126/tinywl-ANativeWindow
     cd tinywl-ANativeWindow
     make
+
 # Usage
 Install the Android app (only source code is available in this repo).  
 Install wlroots and mesa packages from [Xtr126/termux-packages](https://github.com/Xtr126/termux-packages/releases/tag/wlroots-0.18).  
-Then run the following command in tinywl-ANativeWindow directory.
+Then run the following command in tinywl-ANativeWindow directory (after building).
 
     /system/bin/app_process -Djava.library.path=./:/system/lib64 -Djava.class.path=$(pm path com.xtr.compound  | cut -d ':' -f 2) / com.xtr.compound.Tinywl 
 
