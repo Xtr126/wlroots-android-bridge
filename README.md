@@ -9,9 +9,6 @@ GPU acceleration for wlroots gles2/vulkan renderer is provided by mesa in termux
 Therefore performance logically should be within margin of error of the performance in the case of wayland applications running natively on desktop Linux on the exact same hardware.  
 Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly on supported hardware even though Android itself does not support OpenGL.
 
-# What works now
-28-07-2025: Finally vkcube renders at fluid 60fps without any color/image representation issues, after figuring out to use header from minigbm (cros_gralloc_handle.h) to extract pixel format, stride, offset, planes and other attributes from allocated AHardwareBuffer.
-
 # How it works
 * The Activity receives IBinder remote callback object from bundle when it is started by Tinywl.java, then it callbacks to Tinywl.java as soon as the surface is created. Then, Tinywl.java calls C/C++ code  in libtinywl.so through JNI (libtinywl is built from [tinywl-ANativeWindow](https://github.com/Xtr126/tinywl-ANativeWindow) which starts the tinywl server with a reference to (java)Surface passed through to native code. It creates NDK ANativeWindow from JNI Surface object.
 * [TermuxAm](https://github.com/termux/TermuxAm/) is modified and used as a module to launch the activity of our app from app_process with intent containing bundle with IBinder AIDL callback object
@@ -25,13 +22,13 @@ Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly 
     cd tinywl-ANativeWindow
     make
 # Usage
-Install the Android app.  
+Install the Android app (only source code is available in this repo).  
 Install wlroots and mesa packages from [Xtr126/termux-packages](https://github.com/Xtr126/termux-packages/releases/tag/wlroots-0.18).  
-Then run the following command in tinywl-ANativeWindow director.
+Then run the following command in tinywl-ANativeWindow directory.
 
     /system/bin/app_process -Djava.library.path=./:/system/lib64 -Djava.class.path=$(pm path com.xtr.compound  | cut -d ':' -f 2) / com.xtr.compound.Tinywl 
 
-## Acknowledgments
+# Acknowledgments
 
 * [Termux App](https://github.com/termux/termux-app/)
 * [TermuxAm](https://github.com/termux/TermuxAm/)
@@ -39,3 +36,6 @@ Then run the following command in tinywl-ANativeWindow director.
 * https://github.com/termux/termux-packages/pull/19587
 * [minigbm(cros_gralloc_handle.h)](http://android.googlesource.com/platform/external/minigbm/) 
 * [gralloc_handle from libdrm for gbm gralloc](https://gitlab.freedesktop.org/mesa/libdrm) 
+
+# What works now
+28-07-2025: Finally vkcube renders at fluid 60fps without any color/image representation issues, after using `cros_gralloc_handle.h` C++ header from minigbm to extract pixel format, stride, offset, planes and other attributes from allocated AHardwareBuffer.
