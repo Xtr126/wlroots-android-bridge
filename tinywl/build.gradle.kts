@@ -47,12 +47,19 @@ android {
         consumerProguardFiles("consumer-rules.pro")
         externalNativeBuild {
             cmake {
-                arguments("-Dsdk_optional_libbinder_ndk_cpp=${sdkDirectory}/platforms/android-${compileSdk}/optional/libbinder_ndk_cpp")
+                arguments.add(
+                    "-Dsdk_optional_libbinder_ndk_cpp=${sdkDirectory.absolutePath}/platforms/android-${compileSdk}/optional/libbinder_ndk_cpp",
+                )
             }
         }
     }
 
     buildTypes {
+        forEach {
+            it.externalNativeBuild.cmake.arguments.add(
+                "-Daidl_source_output_dir=${layout.buildDirectory.get().asFile.absolutePath}/generated/aidl_source_output_dir/${it.name}/out"
+            )
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -83,10 +90,17 @@ dependencies {
 
 
 afterEvaluate {
+    /*
+    TODO: configure cmake to pass aidl source output dir from aidl compile task
+    tasks.matching {
+        it.name.contains("configureCMakeDebug")
+    }.configureEach {
+        doLast {
+
+        }
+    }
+*/
     tasks.withType<AidlCompile>().configureEach {
-        val destinationDir = sourceOutputDir.get().asFile
-        variantName
-        android.defaultConfig.externalNativeBuild.cmake.arguments.add("-Daidl_source_output_dir=${destinationDir.absolutePath}")
 
         doLast {
             // do java AIDL task first

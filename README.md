@@ -34,6 +34,12 @@ Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly 
     git clone https://github.com/Xtr126/tinywl-ANativeWindow
     cd tinywl-ANativeWindow
     make
+    
+## Building the app
+    # Run this before gradle sync
+    ./gradlew compileDebugAidl
+
+    ./gradlew assembleDebug
 
 # Usage
 Install the Android app (only source code is available in this repo).  
