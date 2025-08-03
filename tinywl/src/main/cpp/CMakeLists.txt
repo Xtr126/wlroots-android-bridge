@@ -35,3 +35,16 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 target_link_libraries(${CMAKE_PROJECT_NAME}
     # List libraries link to the target library
     )
+
+add_library(inputqueue SHARED
+        # List C/C++ source files with relative paths to this CMakeLists.txt.
+        input-queue.cpp
+        ${aidl_source_output_dir}/aidl/com/xtr/compound/ITinywlCallback.cpp)
+
+target_include_directories(inputqueue PRIVATE
+        includes
+        ${sdk_optional_libbinder_ndk_cpp}
+        ${aidl_source_output_dir})
+
+target_link_libraries(inputqueue
+        binder_ndk)

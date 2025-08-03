@@ -3,12 +3,21 @@ package com.xtr.compound
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.view.InputQueue
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.activity.ComponentActivity
 
 
-class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
+class MainActivity : ComponentActivity(), SurfaceHolder.Callback2, InputQueue.Callback {
+    companion object {
+        init {
+            System.loadLibrary("inputqueue")
+        }
+    }
+
+    external fun nativeOnInputQueueCreated(queue: InputQueue, binder: IBinder);
+
     private var mCallback: ITinywlCallback? = null
 
     private val deathRecipient: IBinder.DeathRecipient = IBinder.DeathRecipient {
@@ -34,6 +43,7 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
                          * for root ANativeWindow: https://issuetracker.google.com/issues/320706287
                          */
                         window.takeSurface(this)
+                        window.takeInputQueue(this)
                     } else {
                         /*
                          * On Android 14 and older we use a SurfaceView
@@ -68,5 +78,13 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
+    }
+
+    override fun onInputQueueCreated(queue: InputQueue) {
+        nativeOnInputQueueCreated(queue, mCallback!!.asBinder());
+    }
+
+    override fun onInputQueueDestroyed(queue: InputQueue) {
+        TODO("Not yet implemented")
     }
 }
