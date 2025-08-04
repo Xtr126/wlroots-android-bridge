@@ -14,7 +14,8 @@ public class Tinywl {
     public static final String EXTRA_KEY = "bundle";
     public static final String BINDER_KEY = "callback";
 
-    private static native int onSurfaceCreated(Surface surface, InputTransferToken inputTransferToken, Looper inputThreadLooper);
+    private static native int onSurfaceCreated(Surface surface, InputTransferToken inputTransferToken, long aLooperNativePtr);
+    private static native long getALooperNativePtrForThread();
 
     public static void main(String[] args) {
         try {
@@ -23,12 +24,21 @@ public class Tinywl {
             Looper.prepareMainLooper();
             HandlerThread inputThread = new HandlerThread("input");
             inputThread.start();
-            // 1. Create your Parcelable object (example: Bundle)
             Bundle data = new Bundle();
             data.putBinder(BINDER_KEY, new ITinywlCallback.Stub() {
                 @Override
                 public void onSurfaceCreated(Surface surface, InputTransferToken inputTransferToken) {
-                    new Handler(Looper.getMainLooper()).post(() -> Tinywl.onSurfaceCreated(surface, inputTransferToken, inputThread.getLooper()));
+                    Handler inputHandler = new Handler(inputThread.getLooper());
+                    inputHandler.post(() -> {
+                            // Get the input thread's ALooper first
+                            long aLooperNativePtr = getALooperNativePtrForThread();
+                            // And pass to native code from main thread
+                            Handler handler = new Handler(Looper.getMainLooper());
+                            handler.post(
+                                () -> Tinywl.onSurfaceCreated(surface, inputTransferToken, aLooperNativePtr)
+                            );
+                        }
+                    );
                 }
             });
 
