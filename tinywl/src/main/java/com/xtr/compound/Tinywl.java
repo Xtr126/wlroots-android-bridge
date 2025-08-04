@@ -1,13 +1,11 @@
 package com.xtr.compound;
 
-import android.hardware.input.common.MotionEvent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.view.Surface;
+import android.window.InputTransferToken;
 
-import com.android.server.inputflinger.KeyEvent;
 import com.termux.termuxam.Am;
 
 public class Tinywl {
@@ -26,18 +24,8 @@ public class Tinywl {
             Bundle data = new Bundle();
             data.putBinder(BINDER_KEY, new ITinywlCallback.Stub() {
                 @Override
-                public void onSurfaceCreated(Surface surface) {
+                public void onSurfaceCreated(Surface surface, InputTransferToken inputTransferToken) {
                     new Handler(Looper.getMainLooper()).post(() -> Tinywl.onSurfaceCreated(surface));
-                }
-
-                @Override
-                public void onKeyEvent(KeyEvent event) throws RemoteException {
-
-                }
-
-                @Override
-                public void onMotionEvent(MotionEvent event) throws RemoteException {
-
                 }
             });
 

@@ -39,7 +39,33 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 add_library(inputqueue SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
         input-queue.cpp
-        ${aidl_source_output_dir}/aidl/com/xtr/compound/ITinywlCallback.cpp)
+        # Generated with
+        # find -name '*cpp' | sed 's|^\./|${aidl_source_output_dir}/|'
+        ${aidl_source_output_dir}/com/xtr/compound/ITinywlInput.cpp
+        ${aidl_source_output_dir}/com/android/server/inputflinger/KeyEventAction.cpp
+        ${aidl_source_output_dir}/com/android/server/inputflinger/IInputFlingerRust.cpp
+        ${aidl_source_output_dir}/com/android/server/inputflinger/InputFilterConfiguration.cpp
+        ${aidl_source_output_dir}/com/android/server/inputflinger/DeviceInfo.cpp
+        ${aidl_source_output_dir}/com/android/server/inputflinger/IInputThread.cpp
+        ${aidl_source_output_dir}/com/android/server/inputflinger/IInputFilter.cpp
+        ${aidl_source_output_dir}/com/android/server/inputflinger/KeyEvent.cpp
+        ${aidl_source_output_dir}/com/xtr/compound/ITinywlInput.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/Source.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/Axis.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/Meta.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/ToolType.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/EdgeFlag.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/MotionEvent.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/PointerCoords.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/Flag.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/Classification.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/Action.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/Button.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/PolicyFlag.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/SourceClass.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/VideoFrame.cpp
+        ${aidl_source_output_dir}/android/hardware/input/common/PointerProperties.cpp
+)
 
 target_include_directories(inputqueue PRIVATE
         includes
@@ -47,4 +73,6 @@ target_include_directories(inputqueue PRIVATE
         ${aidl_source_output_dir})
 
 target_link_libraries(inputqueue
-        binder_ndk)
+        binder_ndk
+        android
+        )

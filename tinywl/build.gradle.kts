@@ -42,7 +42,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        minSdk = 30
+        minSdk = 33
 
         consumerProguardFiles("consumer-rules.pro")
         externalNativeBuild {
@@ -121,10 +121,10 @@ afterEvaluate {
 
             // De-duplicate source directories- this is needed in case they are added twice like in
             // b/317262738
-            val sourceFolders = sourceDirs.get().distinct()
+            val sourceFolder = project.projectDir.resolve("src/main/cpp/aidl")
             val importFolders = importDirs.files
 
-            val fullImportList = sourceFolders.map { it.asFile } + importFolders
+            val fullImportList = listOf(sourceFolder) + importFolders
 
             AidlCompileNdk.aidlCompileDelegate(
                 workerExecutor,
@@ -133,7 +133,7 @@ afterEvaluate {
                 destinationDir,
                 parcelableDir?.asFile,
                 packagedList,
-                sourceFolders.map { it.asFile },
+                listOf(sourceFolder),
                 fullImportList,
                 this as AndroidVariantTask
             )
@@ -142,68 +142,7 @@ afterEvaluate {
     }
 }
 
-/*
-tasks.register<Task>("compileAidlNdk") {
-    doLast {
-        val project: Project = project
-        // The path to the aidl executable, using the provided Android SDK information.
-        val aidl = androidComponents.sdkComponents.aidl.get().executable.get().asFile.absolutePath
 
-        // The output directory for the generated C++ files.
-        val outDir = project.projectDir.resolve("src/main/cpp/aidl")
-
-        // The output directory for the generated header files.
-        val headerOutDir = project.projectDir.resolve("src/main/cpp/includes")
-
-        // The search path for AIDL imports.
-        val searchPath = project.projectDir.resolve("src/main/aidl")
-
-
-        val collector =
-            FileAction { root: Path, file: Path ->
-                if (file.name != "Surface.aidl") exec {
-                    // Set the executable path.
-                    executable(aidl)
-
-                    // Set the command-line arguments as a list of strings.
-                    args(
-                        "--lang=ndk",
-                        "-o", outDir.absolutePath,
-                        "-h", headerOutDir.absolutePath,
-                        "-I", searchPath.absolutePath,
-                        file.absolutePathString()
-                    )
-                }
-            }
-
-        DirectoryWalker.builder()
-            .root(searchPath.toPath())
-            .extensions("aidl")
-            .action(collector)
-            .build()
-            .walk()
-
-    }
-}
-
-tasks.named("clean").configure {
-    doLast {
-        val aidlCppOutDir = listOf(
-            project.projectDir.absolutePath,
-            "src", "main", "cpp", "aidl"
-        ).joinToString(File.separator)
-
-        val aidlCppHeaderOutDir = listOf(
-            project.projectDir.absolutePath,
-            "src", "main", "cpp", "includes", "aidl"
-        ).joinToString(File.separator)
-
-        file(aidlCppOutDir).deleteRecursively()
-        file(aidlCppHeaderOutDir).deleteRecursively()
-    }
-}
-
-*/
 
 /**
  * Aidl compile task from android gradle plugin adapted for NDK
@@ -271,10 +210,10 @@ abstract class AidlCompileNdk : NonIncrementalTask() {
 
         // De-duplicate source directories- this is needed in case they are added twice like in
         // b/317262738
-        val sourceFolders = sourceDirs.get().distinct()
+        val sourceFolder = project.projectDir.resolve("src/main/cpp/aidl")
         val importFolders = importDirs.files
 
-        val fullImportList = sourceFolders.map { it.asFile } + importFolders
+        val fullImportList = listOf(sourceFolder) + importFolders
 
         aidlCompileDelegate(
             workerExecutor,
@@ -283,7 +222,7 @@ abstract class AidlCompileNdk : NonIncrementalTask() {
             destinationDir,
             parcelableDir?.asFile,
             packagedList,
-            sourceFolders.map { it.asFile },
+            listOf(sourceFolder),
             fullImportList,
             this
         )

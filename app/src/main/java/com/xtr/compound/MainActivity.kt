@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2, InputQueue.Ca
         }
     }
 
-    external fun nativeOnInputQueueCreated(queue: InputQueue, binder: IBinder);
+    external fun nativeOnInputQueueCreated(queue: InputQueue, binder: IBinder)
 
     private var mCallback: ITinywlCallback? = null
 
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2, InputQueue.Ca
                          * for root ANativeWindow: https://issuetracker.google.com/issues/320706287
                          */
                         window.takeSurface(this)
-                        window.takeInputQueue(this)
+                        // Input is handled using AInputReceiver in remote process
                     } else {
                         /*
                          * On Android 14 and older we use a SurfaceView
@@ -52,6 +52,8 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2, InputQueue.Ca
                         val surfaceView = SurfaceView(this)
                         setContentView(surfaceView)
                         surfaceView.holder.addCallback(this)
+                        // We take the input queue and use in native code for Android 14
+                        window.takeInputQueue(this)
                     }
                 }
             }
@@ -66,7 +68,9 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2, InputQueue.Ca
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
-        mCallback?.onSurfaceCreated(holder.surface)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM)
+            mCallback?.onSurfaceCreated(holder.surface, window.rootSurfaceControl!!.inputTransferToken)
+        else mCallback?.onSurfaceCreated(holder.surface, null)
     }
 
     override fun surfaceChanged(
@@ -81,7 +85,7 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2, InputQueue.Ca
     }
 
     override fun onInputQueueCreated(queue: InputQueue) {
-        nativeOnInputQueueCreated(queue, mCallback!!.asBinder());
+        nativeOnInputQueueCreated(queue, mCallback!!.asBinder())
     }
 
     override fun onInputQueueDestroyed(queue: InputQueue) {

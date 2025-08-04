@@ -3,7 +3,7 @@
 #include <android/binder_parcel.h>
 #include <android/binder_parcel_jni.h>
 #include <android/binder_ibinder_jni.h>
-#include <aidl/com/xtr/compound/ITinywlCallback.h>
+#include <aidl/com/xtr/compound/ITinywlInput.h>
 //#include <aidl/android/hardware/input/common/MotionEvent.h>
 
 using namespace aidl::com::xtr::compound;
@@ -15,7 +15,7 @@ Java_com_xtr_compound_MainActivity_nativeOnInputQueueCreated(JNIEnv *env, jobjec
                                                              jobject queue, jobject binder) {
     AIBinder* pBinder = AIBinder_fromJavaBinder(env, binder);
     const ::ndk::SpAIBinder spBinder(pBinder);
-    std::shared_ptr<ITinywlCallback> callback = ITinywlCallback::fromBinder(spBinder);
+    std::shared_ptr<ITinywlInput> callback = ITinywlInput::fromBinder(spBinder);
 
     AInputQueue *inputQueue = AInputQueue_fromJava(env, queue);
     AInputEvent* event = nullptr;
