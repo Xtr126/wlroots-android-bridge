@@ -90,21 +90,15 @@ dependencies {
 
 
 afterEvaluate {
-    /*
-    TODO: configure cmake to pass aidl source output dir from aidl compile task
-    tasks.matching {
-        it.name.contains("configureCMakeDebug")
-    }.configureEach {
-        doLast {
-
-        }
+    tasks.named { it.contains("cmake", true) }.configureEach {
+        dependsOn(tasks.withType<AidlCompile>())
     }
-*/
     tasks.withType<AidlCompile>().configureEach {
 
         doLast {
             // do java AIDL task first
             taskAction()
+
             // this is full run, clean the previous output'
             val aidlExecutable = buildTools
                 .aidlExecutableProvider()
@@ -137,7 +131,6 @@ afterEvaluate {
                 fullImportList,
                 this as AndroidVariantTask
             )
-
         }
     }
 }

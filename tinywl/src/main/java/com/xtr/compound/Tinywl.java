@@ -13,7 +13,7 @@ public class Tinywl {
     public static final String EXTRA_KEY = "bundle";
     public static final String BINDER_KEY = "callback";
 
-    private static native int onSurfaceCreated(Surface surface);
+    private static native int onSurfaceCreated(Surface surface, InputTransferToken inputTransferToken);
 
     public static void main(String[] args) {
         try {
@@ -25,7 +25,7 @@ public class Tinywl {
             data.putBinder(BINDER_KEY, new ITinywlCallback.Stub() {
                 @Override
                 public void onSurfaceCreated(Surface surface, InputTransferToken inputTransferToken) {
-                    new Handler(Looper.getMainLooper()).post(() -> Tinywl.onSurfaceCreated(surface));
+                    new Handler(Looper.getMainLooper()).post(() -> Tinywl.onSurfaceCreated(surface, inputTransferToken));
                 }
             });
 
