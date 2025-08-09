@@ -50,6 +50,7 @@ android {
                 arguments.add(
                     "-Dsdk_optional_libbinder_ndk_cpp=${sdkDirectory.absolutePath}/platforms/android-${compileSdk}/optional/libbinder_ndk_cpp",
                 )
+                abiFilters("x86_64")
             }
         }
     }
