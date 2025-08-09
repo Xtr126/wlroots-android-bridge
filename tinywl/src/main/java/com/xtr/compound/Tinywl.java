@@ -2,7 +2,6 @@ package com.xtr.compound;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.view.Surface;
 import android.window.InputTransferToken;
@@ -15,29 +14,19 @@ public class Tinywl {
     public static final String BINDER_KEY = "callback";
 
     private static native int onSurfaceCreated(Surface surface, InputTransferToken inputTransferToken, long aLooperNativePtr);
-    private static native long getALooperNativePtrForThread();
 
     public static void main(String[] args) {
         try {
             new ProcessBuilder("logcat", "-v", "color", "--pid=" + android.os.Process.myPid()).inheritIO().start();
             System.loadLibrary("tinywl");
             Looper.prepareMainLooper();
-            HandlerThread inputThread = new HandlerThread("input");
-            inputThread.start();
             Bundle data = new Bundle();
             data.putBinder(BINDER_KEY, new ITinywlCallback.Stub() {
                 @Override
                 public void onSurfaceCreated(Surface surface, InputTransferToken inputTransferToken) {
-                    Handler inputHandler = new Handler(inputThread.getLooper());
-                    inputHandler.post(() -> {
-                            // Get the input thread's ALooper first
-                            long aLooperNativePtr = getALooperNativePtrForThread();
-                            // And pass to native code from main thread
-                            Handler handler = new Handler(Looper.getMainLooper());
-                            handler.post(
-                                () -> Tinywl.onSurfaceCreated(surface, inputTransferToken, aLooperNativePtr)
-                            );
-                        }
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(
+                        () -> Tinywl.onSurfaceCreated(surface, inputTransferToken, -1)
                     );
                 }
             });

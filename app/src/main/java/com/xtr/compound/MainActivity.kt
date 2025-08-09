@@ -43,7 +43,8 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2, InputQueue.Ca
                          * for root ANativeWindow: https://issuetracker.google.com/issues/320706287
                          */
                         window.takeSurface(this)
-                        // Input is handled using AInputReceiver in remote process
+                        window.takeInputQueue(this)
+                        // TODO: Use AInputReceiver APIs for Android >= 15
                     } else {
                         /*
                          * On Android 14 and older we use a SurfaceView
@@ -89,6 +90,5 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2, InputQueue.Ca
     }
 
     override fun onInputQueueDestroyed(queue: InputQueue) {
-        TODO("Not yet implemented")
     }
 }

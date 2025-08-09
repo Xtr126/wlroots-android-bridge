@@ -6,6 +6,6 @@ import com.android.server.inputflinger.KeyEvent;
 import android.hardware.input.common.MotionEvent;
 
 interface ITinywlInput {
-    void onKeyEvent(in KeyEvent event);
-    void onMotionEvent(in MotionEvent event);
+    boolean onKeyEvent(in KeyEvent event);
+    boolean onMotionEvent(in MotionEvent event);
 }
