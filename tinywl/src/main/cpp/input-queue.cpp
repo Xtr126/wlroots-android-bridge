@@ -3,11 +3,11 @@
 #include <android/binder_parcel.h>
 #include <android/binder_parcel_jni.h>
 #include <android/binder_ibinder_jni.h>
-#include <aidl/com/xtr/compound/ITinywlInput.h>
+#include <aidl/tinywl/ITinywlInput.h>
 #include <aidl/android/hardware/input/common/MotionEvent.h>
 #include <aidl/com/android/server/inputflinger/KeyEvent.h>
 
-using namespace aidl::com::xtr::compound;
+using namespace aidl::tinywl;
 using namespace aidl::android::hardware::input::common;
 using namespace aidl::com::android::server::inputflinger;
 

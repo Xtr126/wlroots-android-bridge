@@ -1,5 +1,5 @@
 // ITinywlInput.aidl
-package com.xtr.compound;
+package tinywl;
 
 // Declare any non-default types here with import statements
 import com.android.server.inputflinger.KeyEvent;

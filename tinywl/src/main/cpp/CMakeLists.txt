@@ -36,12 +36,14 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     # List libraries link to the target library
     )
 
+file(GLOB_RECURSE SOURCE_FILES "*.cpp")
+
 add_library(inputqueue SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
         input-queue.cpp
         # Generated with
         # find -name '*cpp' | sed 's|^\./|${aidl_source_output_dir}/|'
-        ${aidl_source_output_dir}/com/xtr/compound/ITinywlInput.cpp
+        ${aidl_source_output_dir}/tinywl/ITinywlInput.cpp
         ${aidl_source_output_dir}/com/android/server/inputflinger/KeyEventAction.cpp
         ${aidl_source_output_dir}/com/android/server/inputflinger/IInputFlingerRust.cpp
         ${aidl_source_output_dir}/com/android/server/inputflinger/InputFilterConfiguration.cpp
@@ -49,7 +51,6 @@ add_library(inputqueue SHARED
         ${aidl_source_output_dir}/com/android/server/inputflinger/IInputThread.cpp
         ${aidl_source_output_dir}/com/android/server/inputflinger/IInputFilter.cpp
         ${aidl_source_output_dir}/com/android/server/inputflinger/KeyEvent.cpp
-        ${aidl_source_output_dir}/com/xtr/compound/ITinywlInput.cpp
         ${aidl_source_output_dir}/android/hardware/input/common/Source.cpp
         ${aidl_source_output_dir}/android/hardware/input/common/Axis.cpp
         ${aidl_source_output_dir}/android/hardware/input/common/Meta.cpp
