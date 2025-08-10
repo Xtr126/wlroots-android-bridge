@@ -4,5 +4,5 @@ package com.xtr.compound;
 // Declare any non-default types here with import statements
 
 interface ITinywlCallback {
-    void onSurfaceCreated(in Surface surface, in InputTransferToken token);
+    void onSurfaceCreated(in Surface surface);
 }

@@ -19,16 +19,15 @@
 
 extern "C"
 JNIEXPORT int JNICALL
-Java_com_xtr_compound_Tinywl_onSurfaceCreated(JNIEnv *env, jclass clazz, jobject surface,
-                                              jobject input_transfer_token,
-                                              jlong input_thread_looper_native_ptr) {
+Java_com_xtr_compound_Tinywl_onSurfaceCreated(JNIEnv *env, jclass clazz, jobject surface) {
     // Cast nativePtr back to your compositor's context
     // Get ANativeWindow from jSurface
-//    ANativeWindow* android_native_window = ANativeWindow_fromSurface(env, jSurface);
+    // ANativeWindow* android_native_window = ANativeWindow_fromSurface(env, jSurface);
     // Store this android_native_window pointer for this toplevel
     // You'll then use ANativeWindow_lock/unlockAndPost with AHardwareBuffer
 }
+
 extern "C"
-JNIEXPORT jlong JNICALL
-Java_com_xtr_compound_Tinywl_getALooperNativePtrForThread(JNIEnv *env, jclass clazz) {
+JNIEXPORT jobject JNICALL
+Java_com_xtr_compound_Tinywl_nativeGetBinder(JNIEnv *env, jclass clazz) {
 }

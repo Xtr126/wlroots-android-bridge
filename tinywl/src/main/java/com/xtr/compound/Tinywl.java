@@ -2,9 +2,9 @@ package com.xtr.compound;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.view.Surface;
-import android.window.InputTransferToken;
 
 import com.termux.termuxam.Am;
 
@@ -12,8 +12,10 @@ public class Tinywl {
     private static final String TAG = "Tinywl";
     public static final String EXTRA_KEY = "bundle";
     public static final String BINDER_KEY = "callback";
+    public static final String BINDER_KEY_INPUT = "input";
 
-    private static native int onSurfaceCreated(Surface surface, InputTransferToken inputTransferToken, long aLooperNativePtr);
+    private static native int onSurfaceCreated(Surface surface);
+    private static native IBinder nativeGetBinder();
 
     public static void main(String[] args) {
         try {
@@ -23,13 +25,14 @@ public class Tinywl {
             Bundle data = new Bundle();
             data.putBinder(BINDER_KEY, new ITinywlCallback.Stub() {
                 @Override
-                public void onSurfaceCreated(Surface surface, InputTransferToken inputTransferToken) {
+                public void onSurfaceCreated(Surface surface) {
                     Handler handler = new Handler(Looper.getMainLooper());
                     handler.post(
-                        () -> Tinywl.onSurfaceCreated(surface, inputTransferToken, -1)
+                        () -> Tinywl.onSurfaceCreated(surface)
                     );
                 }
             });
+            data.putBinder(BINDER_KEY_INPUT, nativeGetBinder());
 
             Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-activity", "-n", "com.xtr.compound/.MainActivity", "--activity-clear-task"});
             Looper.loop();
