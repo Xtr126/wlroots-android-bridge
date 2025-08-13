@@ -36,6 +36,8 @@ Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly 
     make
     
 ## Building the app
+Must have app installed for linking against shared libraries at build time.
+
     # Run this before gradle sync
     ./gradlew compileDebugAidl
 
@@ -46,7 +48,7 @@ Install the Android app (only source code is available in this repo).
 Install wlroots and mesa packages from [Xtr126/termux-packages](https://github.com/Xtr126/termux-packages/releases/tag/wlroots-0.18).  
 Then run the following command in tinywl-ANativeWindow directory (after building).
 
-    /system/bin/app_process -Djava.library.path=./:/system/lib64 -Djava.class.path=$(pm path com.xtr.compound  | cut -d ':' -f 2) / com.xtr.compound.Tinywl 
+    sh start.sh 
 
 # Acknowledgments
 
