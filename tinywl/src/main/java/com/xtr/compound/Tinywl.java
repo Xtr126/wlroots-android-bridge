@@ -23,6 +23,8 @@ public class Tinywl {
             System.loadLibrary("tinywl");
             Looper.prepareMainLooper();
             Bundle data = new Bundle();
+            data.putBinder(BINDER_KEY_INPUT, nativeGetBinder());
+
             data.putBinder(BINDER_KEY, new ITinywlCallback.Stub() {
                 @Override
                 public void onSurfaceCreated(Surface surface) {
@@ -32,7 +34,6 @@ public class Tinywl {
                     );
                 }
             });
-            data.putBinder(BINDER_KEY_INPUT, nativeGetBinder());
 
             Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-activity", "-n", "com.xtr.compound/.MainActivity", "--activity-clear-task"});
             Looper.loop();
