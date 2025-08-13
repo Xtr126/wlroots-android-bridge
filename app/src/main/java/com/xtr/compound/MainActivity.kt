@@ -58,8 +58,8 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
              * instead of taking ownership of our window's surface.
              */
             val surfaceView = SurfaceView(this)
-            setContentView(surfaceView)
             surfaceView.holder.addCallback(this)
+            setContentView(surfaceView)
         }
     }
 
@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
             ?.let { binder ->
                 window.takeInputQueue(object : InputQueue.Callback {
                     override fun onInputQueueCreated(queue: InputQueue) {
-                        nativeOnInputQueueCreated(queue, binder)
+                        Thread { nativeOnInputQueueCreated(queue, binder) }.start()
                     }
 
                     override fun onInputQueueDestroyed(queue: InputQueue) {
