@@ -30,13 +30,14 @@ Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly 
 - [ ] LXC/chroot integration
 
 # Build 
+Must have app installed for linking against shared libraries at build time.
+
     # Build in termux environment
     git clone https://github.com/Xtr126/tinywl-ANativeWindow
     cd tinywl-ANativeWindow
     make
     
 ## Building the app
-Must have app installed for linking against shared libraries at build time.
 
     # Run this before gradle sync
     ./gradlew compileDebugAidl
