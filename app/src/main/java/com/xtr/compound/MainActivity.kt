@@ -2,7 +2,10 @@ package com.xtr.compound
 
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.HandlerThread
 import android.os.IBinder
+import android.os.Looper
 import android.view.InputQueue
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -16,7 +19,8 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
         }
     }
 
-    external fun nativeOnInputQueueCreated(queue: InputQueue, binder: IBinder)
+    external fun nativeOnInputQueueCreated(queue: InputQueue)
+    external fun nativeBinderReceived(binder: IBinder)
 
     private var mCallback: ITinywlCallback? = null
 
@@ -69,9 +73,10 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
         // We take the input queue and use in native code for Android 13/14
         getBinder(Tinywl.BINDER_KEY_INPUT)
             ?.let { binder ->
+                nativeBinderReceived(binder)
                 window.takeInputQueue(object : InputQueue.Callback {
                     override fun onInputQueueCreated(queue: InputQueue) {
-                        Thread { nativeOnInputQueueCreated(queue, binder) }.start()
+                        nativeOnInputQueueCreated(queue)
                     }
 
                     override fun onInputQueueDestroyed(queue: InputQueue) {

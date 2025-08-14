@@ -119,15 +119,14 @@ KeyEvent KeyEvent_fromAInputEvent(AInputEvent *event) {
     return keyEvent;
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_xtr_compound_MainActivity_nativeOnInputQueueCreated(JNIEnv *env, jobject thiz,
-                                                             jobject queue, jobject binder) {
-    AIBinder* pBinder = AIBinder_fromJavaBinder(env, binder);
-    const ::ndk::SpAIBinder spBinder(pBinder);
-    std::shared_ptr<ITinywlInput> callback = ITinywlInput::fromBinder(spBinder);
+std::shared_ptr<ITinywlInput> callback = nullptr;
 
-    AInputQueue *inputQueue = AInputQueue_fromJava(env, queue);
+jobject jQueueRef = nullptr;
+
+static int ALooper_callback(int fd, int events, void* data){
+    auto* inputQueue = (AInputQueue*)data;
+    if (callback == nullptr || inputQueue == nullptr) return 0;
+
     AInputEvent* event = nullptr;
 
     while (AInputQueue_getEvent(inputQueue, &event) >= 0) {
@@ -148,5 +147,24 @@ Java_com_xtr_compound_MainActivity_nativeOnInputQueueCreated(JNIEnv *env, jobjec
         AInputQueue_finishEvent(inputQueue, event, handled);
     }
 
-    AIBinder_decStrong(pBinder);
+    return 1;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_xtr_compound_MainActivity_nativeOnInputQueueCreated(JNIEnv *env, jobject thiz,
+                                                             jobject jQueue) {
+    if (jQueueRef != nullptr) env->DeleteGlobalRef(jQueueRef);
+    jQueueRef = env->NewGlobalRef(jQueue);
+
+    AInputQueue *inputQueue = AInputQueue_fromJava(env, jQueueRef);
+    AInputQueue_attachLooper(inputQueue, ALooper_forThread(), 1, ALooper_callback, inputQueue);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_xtr_compound_MainActivity_nativeBinderReceived(JNIEnv *env, jobject thiz, jobject binder) {
+    AIBinder* pBinder = AIBinder_fromJavaBinder(env, binder);
+    const ::ndk::SpAIBinder spBinder(pBinder);
+    callback = ITinywlInput::fromBinder(spBinder);
 }
