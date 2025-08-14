@@ -60,6 +60,24 @@ void PointerCoords_setAxisValue(PointerCoords coords, int32_t axis, float value)
     coords.values[index] = value;
 }
 
+PointerCoords getPointerCoordsForPointerIndex(const AInputEvent *event, int pointerIndex) {
+    PointerCoords pointerCoords;
+    pointerCoords.values.reserve(AMOTION_EVENT_MAXIMUM_VALID_AXIS_VALUE + 1);
+    for (int axis = 0; axis <= AMOTION_EVENT_MAXIMUM_VALID_AXIS_VALUE; ++axis) {
+        PointerCoords_setAxisValue(pointerCoords, axis,
+           AMotionEvent_getAxisValue(event, axis, pointerIndex));
+    }
+    return pointerCoords;
+}
+
+PointerProperties getPointerPropertiesForPointerIndex(const AInputEvent *event, int pointerIndex) {
+    PointerProperties pointerProperties;
+    pointerProperties.id = AMotionEvent_getPointerId(event, pointerIndex);
+    pointerProperties.toolType = static_cast<ToolType>(AMotionEvent_getToolType(event,
+                                                                                pointerIndex));
+    return pointerProperties;
+}
+
 MotionEvent MotionEvent_fromAInputEvent(const AInputEvent *event) {
     MotionEvent motionEvent;
     motionEvent.source = static_cast<Source>(AInputEvent_getSource(event));
@@ -78,18 +96,11 @@ MotionEvent MotionEvent_fromAInputEvent(const AInputEvent *event) {
 
     size_t pointerCount = AMotionEvent_getPointerCount(event);
     for (int pointerIndex = 0; pointerIndex < pointerCount; ++pointerIndex) {
-        PointerProperties pointerProperties;
-        pointerProperties.id = AMotionEvent_getPointerId(event, pointerIndex);
-        pointerProperties.toolType = static_cast<ToolType>(AMotionEvent_getToolType(event,
-                                                                                    pointerIndex));
+        PointerProperties pointerProperties = getPointerPropertiesForPointerIndex(event, pointerIndex);
         motionEvent.pointerProperties.push_back(pointerProperties);
 
-        PointerCoords pointerCoords;
-        motionEvent.pointerCoords.reserve(AMOTION_EVENT_MAXIMUM_VALID_AXIS_VALUE + 1);
-        for (int axis = 0; axis <= AMOTION_EVENT_MAXIMUM_VALID_AXIS_VALUE; ++axis) {
-            PointerCoords_setAxisValue(pointerCoords, axis,
-               AMotionEvent_getAxisValue(event, axis, pointerIndex));
-        }
+        PointerCoords pointerCoords = getPointerCoordsForPointerIndex(event, pointerIndex);
+        motionEvent.pointerCoords.push_back(pointerCoords);
     }
     return motionEvent;
 }
