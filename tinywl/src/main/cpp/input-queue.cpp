@@ -39,32 +39,30 @@ static float PointerCoords_getAxisValue(PointerCoords coords, int32_t axis) {
     return coords.values[BitSet64::getIndexOfBit(coords.bits, axis)];
 }
 
-void PointerCoords_setAxisValue(PointerCoords coords, int32_t axis, float value) {
+void PointerCoords_setAxisValue(PointerCoords *coords, int32_t axis, float value) {
     if (axis < 0 || axis > AMOTION_EVENT_MAXIMUM_VALID_AXIS_VALUE) {
         return;
     }
 
-    uint32_t index = BitSet64::getIndexOfBit(coords.bits, axis);
-    if (!BitSet64::hasBit(coords.bits, axis)) {
+    uint32_t index = BitSet64::getIndexOfBit(coords->bits, axis);
+    if (!BitSet64::hasBit(coords->bits, axis)) {
         if (value == 0) {
             return; // axes with value 0 do not need to be stored
         }
 
-        uint32_t count = BitSet64::count(coords.bits);
-        BitSet64::markBit(reinterpret_cast<uint64_t &>(coords.bits), axis);
+        uint32_t count = BitSet64::count(coords->bits);
+        BitSet64::markBit(reinterpret_cast<uint64_t &>(coords->bits), axis);
         for (uint32_t i = count; i > index; i--) {
-            coords.values[i] = coords.values[i - 1];
+            coords->values[i] = coords->values[i - 1];
         }
     }
-
-    coords.values[index] = value;
+    coords->values.push_back(value);
 }
 
 PointerCoords getPointerCoordsForPointerIndex(const AInputEvent *event, int pointerIndex) {
     PointerCoords pointerCoords;
-    pointerCoords.values.reserve(AMOTION_EVENT_MAXIMUM_VALID_AXIS_VALUE + 1);
     for (int axis = 0; axis <= AMOTION_EVENT_MAXIMUM_VALID_AXIS_VALUE; ++axis) {
-        PointerCoords_setAxisValue(pointerCoords, axis,
+        PointerCoords_setAxisValue(&pointerCoords, axis,
            AMotionEvent_getAxisValue(event, axis, pointerIndex));
     }
     return pointerCoords;
