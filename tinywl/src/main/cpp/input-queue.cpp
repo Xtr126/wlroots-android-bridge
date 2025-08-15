@@ -32,43 +32,43 @@ struct BitSet64 {
     static inline void markBit(uint64_t& value, uint32_t n) { value |= valueForBit(n); }
 };
 
-static float PointerCoords_getAxisValue(PointerCoords coords, int32_t axis) {
+extern float PointerCoords_getAxisValue(const PointerCoords& coords, int32_t axis) {
     if (axis < 0 || axis > AMOTION_EVENT_MAXIMUM_VALID_AXIS_VALUE || !BitSet64::hasBit(coords.bits, axis)){
         return 0;
     }
     return coords.values[BitSet64::getIndexOfBit(coords.bits, axis)];
 }
 
-void PointerCoords_setAxisValue(PointerCoords *coords, int32_t axis, float value) {
+static void PointerCoords_setAxisValue(PointerCoords& coords, int32_t axis, float value) {
     if (axis < 0 || axis > AMOTION_EVENT_MAXIMUM_VALID_AXIS_VALUE) {
         return;
     }
 
-    uint32_t index = BitSet64::getIndexOfBit(coords->bits, axis);
-    if (!BitSet64::hasBit(coords->bits, axis)) {
+    uint32_t index = BitSet64::getIndexOfBit(coords.bits, axis);
+    if (!BitSet64::hasBit(coords.bits, axis)) {
         if (value == 0) {
             return; // axes with value 0 do not need to be stored
         }
 
-        uint32_t count = BitSet64::count(coords->bits);
-        BitSet64::markBit(reinterpret_cast<uint64_t &>(coords->bits), axis);
+        uint32_t count = BitSet64::count(coords.bits);
+        BitSet64::markBit(reinterpret_cast<uint64_t &>(coords.bits), axis);
         for (uint32_t i = count; i > index; i--) {
-            coords->values[i] = coords->values[i - 1];
+            coords.values[i] = coords.values[i - 1];
         }
     }
-    coords->values.push_back(value);
+    coords.values.push_back(value);
 }
 
-PointerCoords getPointerCoordsForPointerIndex(const AInputEvent *event, int pointerIndex) {
+static PointerCoords getPointerCoordsForPointerIndex(const AInputEvent *event, int pointerIndex) {
     PointerCoords pointerCoords;
     for (int axis = 0; axis <= AMOTION_EVENT_MAXIMUM_VALID_AXIS_VALUE; ++axis) {
-        PointerCoords_setAxisValue(&pointerCoords, axis,
+        PointerCoords_setAxisValue(pointerCoords, axis,
            AMotionEvent_getAxisValue(event, axis, pointerIndex));
     }
     return pointerCoords;
 }
 
-PointerProperties getPointerPropertiesForPointerIndex(const AInputEvent *event, int pointerIndex) {
+static PointerProperties getPointerPropertiesForPointerIndex(const AInputEvent *event, int pointerIndex) {
     PointerProperties pointerProperties;
     pointerProperties.id = AMotionEvent_getPointerId(event, pointerIndex);
     pointerProperties.toolType = static_cast<ToolType>(AMotionEvent_getToolType(event,
@@ -76,7 +76,7 @@ PointerProperties getPointerPropertiesForPointerIndex(const AInputEvent *event, 
     return pointerProperties;
 }
 
-MotionEvent MotionEvent_fromAInputEvent(const AInputEvent *event) {
+static MotionEvent MotionEvent_fromAInputEvent(const AInputEvent *event) {
     MotionEvent motionEvent;
     motionEvent.source = static_cast<Source>(AInputEvent_getSource(event));
     motionEvent.deviceId = AInputEvent_getDeviceId(event);
@@ -103,7 +103,7 @@ MotionEvent MotionEvent_fromAInputEvent(const AInputEvent *event) {
     return motionEvent;
 }
 
-KeyEvent KeyEvent_fromAInputEvent(AInputEvent *event) {
+static KeyEvent KeyEvent_fromAInputEvent(AInputEvent *event) {
     KeyEvent keyEvent;
     keyEvent.source = static_cast<Source>(AInputEvent_getSource(event));
     keyEvent.deviceId = AInputEvent_getDeviceId(event);
@@ -117,9 +117,9 @@ KeyEvent KeyEvent_fromAInputEvent(AInputEvent *event) {
     return keyEvent;
 }
 
-std::shared_ptr<ITinywlInput> callback = nullptr;
+static std::shared_ptr<ITinywlInput> callback = nullptr;
 
-jobject jQueueRef = nullptr;
+static jobject jQueueRef = nullptr;
 
 static int ALooper_callback(int fd, int events, void* data){
     auto* inputQueue = (AInputQueue*)data;
