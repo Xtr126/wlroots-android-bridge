@@ -5,4 +5,5 @@ package com.xtr.compound;
 
 interface ITinywlCallback {
     void onSurfaceCreated(in Surface surface);
+    void onSurfaceChanged(in Surface surface);
 }

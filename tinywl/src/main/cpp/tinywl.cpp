@@ -31,3 +31,7 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_xtr_compound_Tinywl_nativeGetBinder(JNIEnv *env, jclass clazz) {
 }
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_xtr_compound_Tinywl_onSurfaceChanged(JNIEnv *env, jclass clazz, jobject surface) {
+}

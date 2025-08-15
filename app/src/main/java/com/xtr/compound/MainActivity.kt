@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
-        mCallback?.onSurfaceCreated(holder.surface)
+        mCallback!!.onSurfaceCreated(holder.surface)
     }
 
     override fun surfaceChanged(
@@ -105,6 +105,7 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
         width: Int,
         height: Int
     ) {
+        mCallback!!.onSurfaceChanged(holder.surface);
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {

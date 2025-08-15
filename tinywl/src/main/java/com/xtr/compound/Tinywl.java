@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.view.Surface;
 
 import com.termux.termuxam.Am;
@@ -15,6 +16,7 @@ public class Tinywl {
     public static final String BINDER_KEY_INPUT = "input";
 
     private static native int onSurfaceCreated(Surface surface);
+    private static native void onSurfaceChanged(Surface surface);
     private static native IBinder nativeGetBinder();
 
     public static void main(String[] args) {
@@ -32,6 +34,11 @@ public class Tinywl {
                     handler.post(
                         () -> Tinywl.onSurfaceCreated(surface)
                     );
+                }
+
+                @Override
+                public void onSurfaceChanged(Surface surface) {
+                    Tinywl.onSurfaceChanged(surface);
                 }
             });
 
