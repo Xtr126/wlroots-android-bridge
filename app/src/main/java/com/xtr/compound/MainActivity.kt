@@ -2,10 +2,7 @@ package com.xtr.compound
 
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
 import android.os.IBinder
-import android.os.Looper
 import android.view.InputQueue
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -55,7 +52,12 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
              * ASurfaceControl_createFromWindow returning NULL
              * for root ANativeWindow: https://issuetracker.google.com/issues/320706287
              */
-            window.takeSurface(this)
+//            window.takeSurface(this)
+            // TODO: request focus for window.takeSurface
+            val surfaceView = SurfaceView(this)
+            surfaceView.holder.addCallback(this)
+            setContentView(surfaceView)
+            surfaceView.requestFocus()
         } else {
             /*
              * On Android 14 and older we use a SurfaceView
@@ -105,7 +107,7 @@ class MainActivity : ComponentActivity(), SurfaceHolder.Callback2 {
         width: Int,
         height: Int
     ) {
-        mCallback!!.onSurfaceChanged(holder.surface);
+        mCallback!!.onSurfaceChanged(holder.surface)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
