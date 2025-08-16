@@ -36,8 +36,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     # List libraries link to the target library
     )
 
-file(GLOB_RECURSE SOURCE_FILES "*.cpp")
-
 add_library(inputqueue SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
         input-queue.cpp

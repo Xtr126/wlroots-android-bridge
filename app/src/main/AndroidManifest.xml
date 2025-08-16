@@ -10,7 +10,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.CompoundWl"
+        android:theme="@style/Theme.App"
         tools:targetApi="31">
         <service
             android:name=".SurfaceService"
@@ -20,13 +20,11 @@
         <activity
             android:name=".SurfaceViewActivity"
             android:exported="false"
-            android:label="@string/title_activity_surface_view"
-            android:theme="@style/Theme.CompoundWl" />
+            android:label="@string/title_activity_surface_view" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTask"
-            android:theme="@style/Theme.CompoundWl">
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

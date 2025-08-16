@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CompoundWl"
+rootProject.name = "wlr-minigbm"
 include(":app")
 include(":TermuxAm")
 include(":tinywl")
