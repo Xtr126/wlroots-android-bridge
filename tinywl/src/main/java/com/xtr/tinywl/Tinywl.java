@@ -1,10 +1,9 @@
-package com.xtr.compound;
+package com.xtr.tinywl;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.view.Surface;
 
 import com.termux.termuxam.Am;
@@ -42,7 +41,7 @@ public class Tinywl {
                 }
             });
 
-            Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-activity", "-n", "com.xtr.compound/.MainActivity", "--activity-clear-task"});
+            Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-activity", "-n", "com.xtr.tinywl/.MainActivity", "--activity-clear-task"});
             Looper.loop();
         } catch (Exception e) {
             e.printStackTrace(System.out);

@@ -1,4 +1,4 @@
-package com.xtr.compound.ui.theme
+package com.xtr.tinywl.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

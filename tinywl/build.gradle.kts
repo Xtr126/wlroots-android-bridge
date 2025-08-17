@@ -38,7 +38,7 @@ plugins {
 }
 
 android {
-    namespace = "com.xtr.compound"
+    namespace = "com.xtr.tinywl"
     compileSdk = 36
 
     defaultConfig {

@@ -1,6 +1,5 @@
-package com.xtr.compound
+package com.xtr.tinywl
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.SurfaceHolder
 import android.view.SurfaceView

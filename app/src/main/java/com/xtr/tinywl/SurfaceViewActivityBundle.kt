@@ -1,4 +1,4 @@
-package com.xtr.compound
+package com.xtr.tinywl
 
 import android.content.Intent
 import android.os.Bundle

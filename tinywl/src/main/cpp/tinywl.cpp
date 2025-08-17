@@ -19,7 +19,7 @@
 
 extern "C"
 JNIEXPORT int JNICALL
-Java_com_xtr_compound_Tinywl_onSurfaceCreated(JNIEnv *env, jclass clazz, jobject surface) {
+Java_com_xtr_tinywl_Tinywl_onSurfaceCreated(JNIEnv *env, jclass clazz, jobject surface) {
     // Cast nativePtr back to your compositor's context
     // Get ANativeWindow from jSurface
     // ANativeWindow* android_native_window = ANativeWindow_fromSurface(env, jSurface);
@@ -29,9 +29,9 @@ Java_com_xtr_compound_Tinywl_onSurfaceCreated(JNIEnv *env, jclass clazz, jobject
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_xtr_compound_Tinywl_nativeGetBinder(JNIEnv *env, jclass clazz) {
+Java_com_xtr_tinywl_Tinywl_nativeGetBinder(JNIEnv *env, jclass clazz) {
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_xtr_compound_Tinywl_onSurfaceChanged(JNIEnv *env, jclass clazz, jobject surface) {
+Java_com_xtr_tinywl_Tinywl_onSurfaceChanged(JNIEnv *env, jclass clazz, jobject surface) {
 }

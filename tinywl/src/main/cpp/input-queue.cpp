@@ -150,7 +150,7 @@ static int ALooper_callback(int fd, int events, void* data){
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_xtr_compound_MainActivity_nativeOnInputQueueCreated(JNIEnv *env, jobject thiz,
+Java_com_xtr_tinywl_MainActivity_nativeOnInputQueueCreated(JNIEnv *env, jobject thiz,
                                                              jobject jQueue) {
     if (jQueueRef != nullptr) env->DeleteGlobalRef(jQueueRef);
     jQueueRef = env->NewGlobalRef(jQueue);
@@ -161,7 +161,7 @@ Java_com_xtr_compound_MainActivity_nativeOnInputQueueCreated(JNIEnv *env, jobjec
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_xtr_compound_MainActivity_nativeBinderReceived(JNIEnv *env, jobject thiz, jobject binder) {
+Java_com_xtr_tinywl_MainActivity_nativeBinderReceived(JNIEnv *env, jobject thiz, jobject binder) {
     AIBinder* pBinder = AIBinder_fromJavaBinder(env, binder);
     const ::ndk::SpAIBinder spBinder(pBinder);
     callback = ITinywlInput::fromBinder(spBinder);

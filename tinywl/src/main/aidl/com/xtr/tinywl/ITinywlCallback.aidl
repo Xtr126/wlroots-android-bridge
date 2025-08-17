@@ -1,5 +1,5 @@
 // ITinywlCallback.aidl
-package com.xtr.compound;
+package com.xtr.tinywl;
 
 // Declare any non-default types here with import statements
 
