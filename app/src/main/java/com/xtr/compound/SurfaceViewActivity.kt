@@ -1,29 +1,20 @@
 package com.xtr.compound
 
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 
 class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
-    var appId: String? = null
+    lateinit var bundle: SurfaceViewActivityBundle
     lateinit var surfaceView: SurfaceView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        appId = intent.getStringExtra("APP_ID")
-        title = intent.getStringExtra("TITLE")
-
-        if (appId.isNullOrEmpty() || title.isNullOrEmpty()) {
-            finish()
-            return
-        }
+        bundle = SurfaceViewActivityBundle(intent)
+        setTitle(bundle.title)
 
         enableEdgeToEdge()
         surfaceView = SurfaceView(this)
@@ -32,9 +23,9 @@ class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
-        mService.onSurfaceAvailableForAppId(
-            appId!!,
-            title.toString(),
+        bundle.binder.getService().onSurfaceCreated(
+            bundle.appId,
+            bundle.title,
             holder.surface,
             surfaceView.width,
             surfaceView.height
@@ -47,43 +38,21 @@ class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
         width: Int,
         height: Int
     ) {
-        mService.onSurfaceChanged(format, width, height)
+        bundle.binder.getService().onSurfaceChanged(bundle.appId,
+            bundle.title,
+            holder.surface,
+            width,
+            height
+        )
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-    }
-
-    private lateinit var mService: SurfaceService
-    private var mBound: Boolean = false
-
-    /** Defines callbacks for service binding, passed to bindService().  */
-    private val connection = object : ServiceConnection {
-
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance.
-            val binder = service as SurfaceService.LocalBinder
-            mService = binder.getService()
-            mBound = true
-        }
-
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            mBound = false
-        }
+        bundle.binder.getService().onSurfaceDestroyed(
+            bundle.appId,
+            bundle.title
+        )
     }
 
 
-    override fun onStart() {
-        super.onStart()
-        // Bind to LocalService.
-        Intent(this, SurfaceService::class.java).also { intent ->
-            bindService(intent, connection, BIND_AUTO_CREATE)
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        unbindService(connection)
-        mBound = false
-    }
 
 }
