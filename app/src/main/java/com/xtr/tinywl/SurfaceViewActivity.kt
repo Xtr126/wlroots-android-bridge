@@ -7,27 +7,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 
 class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
-    lateinit var bundle: SurfaceViewActivityBundle
-    lateinit var surfaceView: SurfaceView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bundle = SurfaceViewActivityBundle(intent)
-        setTitle(bundle.title)
-
         enableEdgeToEdge()
-        surfaceView = SurfaceView(this)
-        surfaceView.holder.addCallback(this)
-        setContentView(surfaceView)
     }
 
+    val bundle: SurfaceViewActivityBundle get() = SurfaceViewActivityBundle(intent)
+    val xdgTopLevel = bundle.xdgTopLevel
+
+    override fun onStart() {
+        super.onStart()
+        setTitle(xdgTopLevel.title)
+        SurfaceView(this).also {
+            it.holder.addCallback(this)
+            setContentView(it)
+        }
+    }
+
+    val mService get() = bundle.binder.getService()
+
     override fun surfaceCreated(holder: SurfaceHolder) {
-        bundle.binder.getService().onSurfaceCreated(
-            bundle.appId,
-            bundle.title,
+        mService.onSurfaceCreated(
+            xdgTopLevel,
             holder.surface,
-            surfaceView.width,
-            surfaceView.height
         )
     }
 
@@ -37,21 +40,13 @@ class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
         width: Int,
         height: Int
     ) {
-        bundle.binder.getService().onSurfaceChanged(bundle.appId,
-            bundle.title,
+        mService.onSurfaceChanged(
+            xdgTopLevel,
             holder.surface,
-            width,
-            height
         )
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-        bundle.binder.getService().onSurfaceDestroyed(
-            bundle.appId,
-            bundle.title
-        )
+        mService.onSurfaceDestroyed(xdgTopLevel)
     }
-
-
-
 }

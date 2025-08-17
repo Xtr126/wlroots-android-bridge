@@ -6,27 +6,24 @@ import android.os.Bundle
 
 class SurfaceViewActivityBundle(
     val binder: SurfaceService.LocalBinder,
-    val appId: String,
-    val title: String
+    val xdgTopLevel: XdgTopLevel,
 
 ) {
     constructor(
         data: Bundle,
     ) : this(
         binder = data.getBinder("BINDER_KEY") as SurfaceService.LocalBinder,
-        appId = data.getString("APP_ID")!!,
-        title = data.getString("TITLE")!!
+        xdgTopLevel = data.getParcelable<XdgTopLevel>("XDG_TOP_LEVEL")!!
     )
 
     constructor(intent: Intent) : this(intent.extras!!)
-    
+
     fun putTo(intent: Intent) {
-        intent.extras?.putThisBundle()
+        intent.extras!!.putThisBundle()
     }
-    
+
     private fun Bundle.putThisBundle() {
         putBinder("BINDER_KEY", binder)
-        putString("APP_ID", appId)
-        putString("TITLE", title)
+        putParcelable("XDG_TOP_LEVEL", xdgTopLevel)
     }
 }

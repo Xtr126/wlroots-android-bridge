@@ -17,21 +17,12 @@
 //      }
 //    }
 
-extern "C"
-JNIEXPORT int JNICALL
-Java_com_xtr_tinywl_Tinywl_onSurfaceCreated(JNIEnv *env, jclass clazz, jobject surface) {
-    // Cast nativePtr back to your compositor's context
-    // Get ANativeWindow from jSurface
-    // ANativeWindow* android_native_window = ANativeWindow_fromSurface(env, jSurface);
-    // Store this android_native_window pointer for this toplevel
-    // You'll then use ANativeWindow_lock/unlockAndPost with AHardwareBuffer
-}
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_xtr_tinywl_Tinywl_nativeGetBinder(JNIEnv *env, jclass clazz) {
+Java_com_xtr_tinywl_Tinywl_nativeGetInputServiceBinder(JNIEnv *env, jclass clazz) {
 }
 extern "C"
-JNIEXPORT void JNICALL
-Java_com_xtr_tinywl_Tinywl_onSurfaceChanged(JNIEnv *env, jclass clazz, jobject surface) {
+JNIEXPORT jobject JNICALL
+Java_com_xtr_tinywl_Tinywl_nativeGetTinywlServiceBinder(JNIEnv *env, jclass clazz) {
 }

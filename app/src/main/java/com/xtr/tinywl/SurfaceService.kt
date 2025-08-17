@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.view.Surface
+import com.xtr.tinywl.Tinywl.BINDER_KEY_TINYWL
+import com.xtr.tinywl.Tinywl.EXTRA_KEY
 
 class SurfaceService : Service() {
     /**
@@ -16,28 +18,18 @@ class SurfaceService : Service() {
         fun getService(): SurfaceService = this@SurfaceService
     }
 
-    override fun onBind(intent: Intent): IBinder {
-        return binder
+    override fun onBind(intent: Intent): IBinder? {
+        return null
     }
 
     // Binder given to client activities.
     private val binder = LocalBinder()
 
-    data class XdgTopLevel(
-        var surface: Surface?,
-        val appId: String,
-        val title: String
-    )
-
-    private val xdgTopLevelList: MutableList<XdgTopLevel> = mutableListOf()
-
     val mXdgTopLevelRemoteCallback = object : ITinywlXdgTopLevel.Stub() {
-        override fun addXdgTopLevel(appId: String, title: String) {
-            xdgTopLevelList.add(XdgTopLevel(null, appId, title))
+        override fun addXdgTopLevel(xdgToplevel: XdgTopLevel) {
+            assert(xdgToplevel.surface == null)
             var bundle = SurfaceViewActivityBundle(
-                binder = binder,
-                appId = appId,
-                title = title
+                binder, xdgToplevel
             )
             val intent = Intent(this@SurfaceService, SurfaceViewActivity::class.java)
             bundle.putTo(intent)
@@ -45,43 +37,51 @@ class SurfaceService : Service() {
             startActivity(intent)
         }
 
-        override fun removeXdgTopLevel(appId: String, title: String) {
-            for (xdgTopLevel in xdgTopLevelList)
-                if (xdgTopLevel.appId == appId && xdgTopLevel.title == title)
-                    xdgTopLevelList.remove(xdgTopLevel)
+        override fun removeXdgTopLevel(xdgToplevel: XdgTopLevel) {
+            // TODO: Implement
         }
 
     }
+
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
+        intent!!.getBundleExtra(EXTRA_KEY)!!
+            .getBinder(BINDER_KEY_TINYWL)
+            .also {
+                mService = ITinywlCallback.Stub.asInterface(it)
+            }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    lateinit var mService: ITinywlCallback;
 
     /**
      * Called by activities when a surface is available
      */
     fun onSurfaceCreated(
-        appId: String,
-        title: String,
+        xdgTopLevel: XdgTopLevel,
         surface: Surface,
-        width: Int,
-        height: Int
     ) {
-        for (xdgTopLevel in xdgTopLevelList)
-            if (xdgTopLevel.appId == appId && xdgTopLevel.title == title)
-                xdgTopLevel.surface = surface
         // Now surface is available, call to wlroots and make it render to it
+        xdgTopLevel.surface = surface
+        mService.onSurfaceCreated(xdgTopLevel)
     }
     
     fun onSurfaceChanged(
-        appId: String,
-        title: String,
+        xdgTopLevel: XdgTopLevel,
         surface: Surface,
-        width: Int,
-        height: Int
     ) {
         // Call to wlroots and resize xdg toplevel now
-
+        xdgTopLevel.surface = surface
+        mService.onSurfaceChanged(xdgTopLevel)
     }
 
-    fun onSurfaceDestroyed(appId: String, title: String) {
+    fun onSurfaceDestroyed(xdgTopLevel: XdgTopLevel) {
         // Call to wlroots and unmap xdg toplevel now
+        mService.onSurfaceDestroyed(xdgTopLevel)
     }
 
 }
