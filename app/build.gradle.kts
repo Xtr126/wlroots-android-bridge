@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.xtr.tinywl"
-        minSdk = 33
+        minSdk = 34
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
