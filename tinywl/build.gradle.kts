@@ -116,10 +116,12 @@ afterEvaluate {
 
             // De-duplicate source directories- this is needed in case they are added twice like in
             // b/317262738
-            val sourceFolder = project.projectDir.resolve("src/main/cpp/aidl")
+            val sourceFolderCpp = project.projectDir.resolve("src/main/cpp/aidl")
+            val sourceFolders = sourceDirs.get().distinct()
+
             val importFolders = importDirs.files
 
-            val fullImportList = listOf(sourceFolder) + importFolders
+            val fullImportList = sourceFolders.map { it.asFile } +  importFolders + listOf(sourceFolderCpp)
 
             AidlCompileNdk.aidlCompileDelegate(
                 workerExecutor,
@@ -128,7 +130,7 @@ afterEvaluate {
                 destinationDir,
                 parcelableDir?.asFile,
                 packagedList,
-                listOf(sourceFolder),
+                sourceFolders.map { it.asFile } + sourceFolderCpp,
                 fullImportList,
                 this as AndroidVariantTask
             )
