@@ -26,7 +26,7 @@ public class Tinywl {
                 Bundle data = new Bundle();
                 data.putBinder(BINDER_KEY_INPUT, nativeGetInputServiceBinder());
                 data.putBinder(BINDER_KEY_TINYWL, nativeGetTinywlServiceBinder());
-                Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-activity", "-n", "com.xtr.tinywl/.MainActivity", "--activity-clear-task"});
+                Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-service", "-n", "com.xtr.tinywl/.SurfaceService"});
             });
 
             Looper.loop();

@@ -150,19 +150,30 @@ static int ALooper_callback(int fd, int events, void* data){
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_xtr_tinywl_MainActivity_nativeOnInputQueueCreated(JNIEnv *env, jobject thiz,
-                                                             jobject jQueue) {
+Java_com_xtr_tinywl_SurfaceViewActivity_nativeOnInputQueueCreated(JNIEnv *env, jobject thiz,
+                                                                  jobject jQueue) {
     if (jQueueRef != nullptr) env->DeleteGlobalRef(jQueueRef);
     jQueueRef = env->NewGlobalRef(jQueue);
 
     AInputQueue *inputQueue = AInputQueue_fromJava(env, jQueueRef);
     AInputQueue_attachLooper(inputQueue, ALooper_forThread(), 1, ALooper_callback, inputQueue);
 }
-
+\
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_xtr_tinywl_MainActivity_nativeBinderReceived(JNIEnv *env, jobject thiz, jobject binder) {
+Java_com_xtr_tinywl_SurfaceServiceKt_nativeInputBinderReceived(JNIEnv *env, jclass clazz,
+                                                               jobject binder) {
     AIBinder* pBinder = AIBinder_fromJavaBinder(env, binder);
     const ::ndk::SpAIBinder spBinder(pBinder);
     callback = ITinywlInput::fromBinder(spBinder);
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_xtr_tinywl_SurfaceServiceKt_nativeOnInputQueueCreated(JNIEnv *env, jclass clazz,
+                                                               jobject jQueue) {
+    if (jQueueRef != nullptr) env->DeleteGlobalRef(jQueueRef);
+    jQueueRef = env->NewGlobalRef(jQueue);
+
+    AInputQueue *inputQueue = AInputQueue_fromJava(env, jQueueRef);
+    AInputQueue_attachLooper(inputQueue, ALooper_forThread(), 1, ALooper_callback, inputQueue);
 }
