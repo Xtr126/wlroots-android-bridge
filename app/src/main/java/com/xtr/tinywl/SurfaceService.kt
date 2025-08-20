@@ -44,7 +44,7 @@ class SurfaceService : Service() {
             )
             val intent = Intent(this@SurfaceService, SurfaceViewActivity::class.java)
             bundle.putTo(intent)
-
+            intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
         }
 
