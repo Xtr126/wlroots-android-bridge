@@ -15,6 +15,7 @@ public class Tinywl {
 
     private static native IBinder nativeGetInputServiceBinder();
     private static native IBinder nativeGetTinywlServiceBinder();
+    private static native void runTinywlLoop();
 
     public static void main(String[] args) {
         try {
@@ -26,7 +27,8 @@ public class Tinywl {
                 Bundle data = new Bundle();
                 data.putBinder(BINDER_KEY_INPUT, nativeGetInputServiceBinder());
                 data.putBinder(BINDER_KEY_TINYWL, nativeGetTinywlServiceBinder());
-                Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-service", "-n", "com.xtr.tinywl/.SurfaceService"});
+                Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-activity", "-n", "com.xtr.tinywl/.MainActivity"});
+                runTinywlLoop();
             });
 
             Looper.loop();

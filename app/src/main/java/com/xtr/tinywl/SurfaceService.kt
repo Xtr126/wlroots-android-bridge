@@ -63,6 +63,7 @@ class SurfaceService : Service() {
             .apply {
                 nativeInputBinderReceived(getBinder(BINDER_KEY_INPUT)!!)
                 mService = ITinywlCallback.Stub.asInterface(getBinder(BINDER_KEY_TINYWL))
+                mService.startTinywl(mXdgTopLevelRemoteCallback)
             }
         return super.onStartCommand(intent, flags, startId)
     }

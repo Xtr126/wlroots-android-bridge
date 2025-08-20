@@ -26,3 +26,7 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_xtr_tinywl_Tinywl_nativeGetTinywlServiceBinder(JNIEnv *env, jclass clazz) {
 }
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_xtr_tinywl_Tinywl_runTinywlLoop(JNIEnv *env, jclass clazz) {
+}
