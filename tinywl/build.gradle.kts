@@ -58,7 +58,7 @@ android {
     buildTypes {
         forEach {
             it.externalNativeBuild.cmake.arguments.add(
-                "-Daidl_source_output_dir=${layout.buildDirectory.get().asFile.absolutePath}/generated/aidl_source_output_dir/${it.name}/out"
+                "-Daidl_source_output_dir=${layout.buildDirectory.get().asFile.absolutePath}/generated/aidl_source_output_dir/${it.name}/out/ndk"
             )
         }
         release {
@@ -106,7 +106,7 @@ afterEvaluate {
                 .get()
                 .absoluteFile
             val frameworkLocation = getAidlFrameworkProvider().get().absoluteFile
-            val destinationDir = sourceOutputDir.get().asFile
+            val destinationDir = sourceOutputDir.get().dir("ndk").asFile
 
             val parcelableDir = packagedDir.orNull
             FileUtils.cleanOutputDir(destinationDir)

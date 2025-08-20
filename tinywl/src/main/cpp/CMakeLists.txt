@@ -16,7 +16,7 @@ project("tinywl")
 add_library(aidl_shared SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
         # Generated with
-        # cd tinywl/build/generated/aidl_source_output_dir/debug/out
+        # cd tinywl/build/generated/aidl_source_output_dir/debug/out/ndk
         # find -name '*cpp' | sed 's|^\./|${aidl_source_output_dir}/|'
         ${aidl_source_output_dir}/com/android/server/inputflinger/KeyEventAction.cpp
         ${aidl_source_output_dir}/com/android/server/inputflinger/IInputFlingerRust.cpp
