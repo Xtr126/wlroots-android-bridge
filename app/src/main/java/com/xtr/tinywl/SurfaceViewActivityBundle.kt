@@ -19,10 +19,10 @@ class SurfaceViewActivityBundle(
     constructor(intent: Intent) : this(intent.extras!!)
 
     fun putTo(intent: Intent) {
-        intent.extras!!.putThisBundle()
+        intent.putExtras(this.asBundle())
     }
 
-    private fun Bundle.putThisBundle() {
+    private fun asBundle(): Bundle = Bundle().apply {
         putBinder("BINDER_KEY", binder)
         putParcelable("XDG_TOP_LEVEL", xdgTopLevel)
     }

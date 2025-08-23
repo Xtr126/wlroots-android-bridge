@@ -288,7 +288,7 @@ abstract class AidlCompileNdk : NonIncrementalTask() {
                     .root(parameters.dir.get().toPath())
                     .extensions("aidl")
                     .filter({
-                        it.pathString.contains("Surface.aidl")
+                        it.fileName.pathString.equals("Surface.aidl")
                     })
                     .action(collector)
                     .build()

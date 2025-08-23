@@ -10,11 +10,13 @@ import com.termux.termuxam.Am;
 public class Tinywl {
     private static final String TAG = "Tinywl";
     public static final String EXTRA_KEY = "bundle";
-    public static final String BINDER_KEY_TINYWL = "callback";
-    public static final String BINDER_KEY_INPUT = "input";
+    public static final String BINDER_KEY_TINYWL_MAIN = "main";
+    public static final String BINDER_KEY_TINYWL_SURFACE = "surface";
+    public static final String BINDER_KEY_TINYWL_INPUT = "input";
 
-    private static native IBinder nativeGetInputServiceBinder();
-    private static native IBinder nativeGetTinywlServiceBinder();
+    private static native IBinder nativeGetTinywlInputServiceBinder();
+    private static native IBinder nativeGetTinywlSurfaceBinder();
+    private static native void nativeRegisterXdgTopLevelCallback();
     private static native void runTinywlLoop();
 
     public static void main(String[] args) {
@@ -25,8 +27,14 @@ public class Tinywl {
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 Bundle data = new Bundle();
-                data.putBinder(BINDER_KEY_INPUT, nativeGetInputServiceBinder());
-                data.putBinder(BINDER_KEY_TINYWL, nativeGetTinywlServiceBinder());
+                data.putBinder(BINDER_KEY_TINYWL_INPUT, nativeGetTinywlInputServiceBinder());
+                data.putBinder(BINDER_KEY_TINYWL_SURFACE, nativeGetTinywlSurfaceBinder());
+                data.putBinder(BINDER_KEY_TINYWL_MAIN, new ITinywlMain.Stub() {
+                    @Override
+                    public void registerXdgTopLevelCallback() {
+                        nativeRegisterXdgTopLevelCallback();
+                    }
+                });
                 Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-activity", "-n", "com.xtr.tinywl/.MainActivity"});
                 runTinywlLoop();
             });

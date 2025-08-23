@@ -6,9 +6,6 @@ import android.os.Binder
 import android.os.IBinder
 import android.view.InputQueue
 import android.view.Surface
-import com.xtr.tinywl.Tinywl.BINDER_KEY_INPUT
-import com.xtr.tinywl.Tinywl.BINDER_KEY_TINYWL
-import com.xtr.tinywl.Tinywl.EXTRA_KEY
 
 external fun nativeInputBinderReceived(binder: IBinder)
 external fun nativeOnInputQueueCreated(queue: InputQueue)
@@ -36,39 +33,49 @@ class SurfaceService : Service() {
     // Binder given to client activities.
     private val binder = LocalBinder()
 
-    val mXdgTopLevelRemoteCallback = object : ITinywlXdgTopLevel.Stub() {
-        override fun addXdgTopLevel(xdgToplevel: XdgTopLevel) {
-            assert(xdgToplevel.surface == null)
-            var bundle = SurfaceViewActivityBundle(
-                binder, xdgToplevel
-            )
-            val intent = Intent(this@SurfaceService, SurfaceViewActivity::class.java)
-            bundle.putTo(intent)
-            intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-        }
-
-        override fun removeXdgTopLevel(xdgToplevel: XdgTopLevel) {
-            // TODO: Implement
-        }
-
+    fun addXdgTopLevel(xdgToplevel: XdgTopLevel) {
+        val bundle = SurfaceViewActivityBundle(
+            binder, xdgToplevel
+        )
+        val intent = Intent(this@SurfaceService, SurfaceViewActivity::class.java)
+        bundle.putTo(intent)
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
     }
+
+    fun removeXdgTopLevel(xdgToplevel: XdgTopLevel) {
+    }
+
 
     override fun onStartCommand(
         intent: Intent?,
         flags: Int,
         startId: Int
     ): Int {
-        intent!!.getBundleExtra(EXTRA_KEY)!!
-            .apply {
-                nativeInputBinderReceived(getBinder(BINDER_KEY_INPUT)!!)
-                mService = ITinywlCallback.Stub.asInterface(getBinder(BINDER_KEY_TINYWL))
-                mService.startTinywl(mXdgTopLevelRemoteCallback)
+
+
+        intent?.getBundleExtra(Tinywl.EXTRA_KEY)
+            ?.apply {
+                nativeInputBinderReceived(getBinder(Tinywl.BINDER_KEY_TINYWL_INPUT)!!)
+                mService = ITinywlSurface.Stub.asInterface(getBinder(Tinywl.BINDER_KEY_TINYWL_SURFACE))
+                ITinywlMain.Stub
+                    .asInterface(getBinder(Tinywl.BINDER_KEY_TINYWL_MAIN))
+                    .registerXdgTopLevelCallback()
+            } ?:
+        intent?.apply {
+            if (getStringExtra(TinywlXdgTopLevelCallback.NATIVE_PTR) != null) {
+                val xdgTopLevel = XdgTopLevel().apply {
+                    appId = getStringExtra(TinywlXdgTopLevelCallback.APP_ID)
+                    title = getStringExtra(TinywlXdgTopLevelCallback.TITLE)
+                    nativePtr = getStringExtra(TinywlXdgTopLevelCallback.NATIVE_PTR)!!.toLong()
+                }
+                addXdgTopLevel(xdgTopLevel)
             }
+        }
         return super.onStartCommand(intent, flags, startId)
     }
 
-    lateinit var mService: ITinywlCallback
+    lateinit var mService: ITinywlSurface
 
     /**
      * Called by activities when a surface is available
@@ -81,7 +88,7 @@ class SurfaceService : Service() {
         xdgTopLevel.surface = surface
         mService.onSurfaceCreated(xdgTopLevel)
     }
-    
+
     fun onSurfaceChanged(
         xdgTopLevel: XdgTopLevel,
         surface: Surface,

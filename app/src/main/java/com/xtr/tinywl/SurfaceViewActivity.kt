@@ -10,26 +10,26 @@ import androidx.activity.enableEdgeToEdge
 
 class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
 
+    var bundle: SurfaceViewActivityBundle? = null
+    val xdgTopLevel get() = bundle?.xdgTopLevel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        bundle = SurfaceViewActivityBundle(intent)
+        xdgTopLevel!!.also {
+            setTitle(it.title)
+            takeSurface()
+            takeInput()
+        }
     }
 
-    val bundle: SurfaceViewActivityBundle get() = SurfaceViewActivityBundle(intent)
-    val xdgTopLevel = bundle.xdgTopLevel
 
-    override fun onStart() {
-        super.onStart()
-        setTitle(xdgTopLevel.title)
-        takeSurface()
-        takeInput()
-    }
-
-    val mService get() = bundle.binder.getService()
+    val mService get() = bundle?.binder?.getService()
 
     override fun surfaceCreated(holder: SurfaceHolder) {
-        mService.onSurfaceCreated(
-            xdgTopLevel,
+        mService!!.onSurfaceCreated(
+            xdgTopLevel!!,
             holder.surface,
         )
     }
@@ -40,14 +40,14 @@ class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
         width: Int,
         height: Int
     ) {
-        mService.onSurfaceChanged(
-            xdgTopLevel,
+        mService!!.onSurfaceChanged(
+            xdgTopLevel!!,
             holder.surface,
         )
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-        mService.onSurfaceDestroyed(xdgTopLevel)
+        mService!!.onSurfaceDestroyed(xdgTopLevel!!)
     }
     private fun takeSurface() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {

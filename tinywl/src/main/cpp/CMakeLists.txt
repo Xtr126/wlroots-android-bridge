@@ -26,8 +26,9 @@ add_library(aidl_shared SHARED
         ${aidl_source_output_dir}/com/android/server/inputflinger/IInputFilter.cpp
         ${aidl_source_output_dir}/com/android/server/inputflinger/KeyEvent.cpp
         ${aidl_source_output_dir}/com/xtr/tinywl/XdgTopLevel.cpp
-        ${aidl_source_output_dir}/com/xtr/tinywl/ITinywlXdgTopLevel.cpp
-        ${aidl_source_output_dir}/com/xtr/tinywl/ITinywlCallback.cpp
+        ${aidl_source_output_dir}/com/xtr/tinywl/ITinywlMain.cpp
+        ${aidl_source_output_dir}/com/xtr/tinywl/ITinywlSurface.cpp
+        ${aidl_source_output_dir}/com/xtr/tinywl/TinywlXdgTopLevelCallback.cpp
         ${aidl_source_output_dir}/android/hardware/input/common/Source.cpp
         ${aidl_source_output_dir}/android/hardware/input/common/Axis.cpp
         ${aidl_source_output_dir}/android/hardware/input/common/Meta.cpp
@@ -43,8 +44,7 @@ add_library(aidl_shared SHARED
         ${aidl_source_output_dir}/android/hardware/input/common/SourceClass.cpp
         ${aidl_source_output_dir}/android/hardware/input/common/VideoFrame.cpp
         ${aidl_source_output_dir}/android/hardware/input/common/PointerProperties.cpp
-        ${aidl_source_output_dir}/tinywl/ITinywlInput.cpp
-)
+        ${aidl_source_output_dir}/tinywl/ITinywlInput.cpp)
 
 target_include_directories(aidl_shared PUBLIC
         ${sdk_optional_libbinder_ndk_cpp}
