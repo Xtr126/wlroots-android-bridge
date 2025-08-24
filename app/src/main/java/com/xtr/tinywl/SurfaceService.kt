@@ -65,8 +65,8 @@ class SurfaceService : Service() {
         intent?.apply {
             if (getStringExtra(TinywlXdgTopLevelCallback.NATIVE_PTR) != null) {
                 val xdgTopLevel = XdgTopLevel().apply {
-                    appId = getStringExtra(TinywlXdgTopLevelCallback.APP_ID)
-                    title = getStringExtra(TinywlXdgTopLevelCallback.TITLE)
+                    appId = getStringExtra(TinywlXdgTopLevelCallback.APP_ID) ?: ""
+                    title = getStringExtra(TinywlXdgTopLevelCallback.TITLE) ?: ""
                     nativePtr = getStringExtra(TinywlXdgTopLevelCallback.NATIVE_PTR)!!.toLong()
                 }
                 addXdgTopLevel(xdgTopLevel)
