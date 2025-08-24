@@ -33,6 +33,8 @@ class SurfaceService : Service() {
     // Binder given to client activities.
     private val binder = LocalBinder()
 
+    val xdgTopLevelActivityFinishCallbackMap = mutableMapOf<XdgTopLevel, () -> Unit>()
+
     fun addXdgTopLevel(xdgToplevel: XdgTopLevel) {
         val bundle = SurfaceViewActivityBundle(
             binder, xdgToplevel
@@ -44,6 +46,9 @@ class SurfaceService : Service() {
     }
 
     fun removeXdgTopLevel(xdgToplevel: XdgTopLevel) {
+        // Invoke the callback to finish the activity
+        xdgTopLevelActivityFinishCallbackMap[xdgToplevel]?.invoke()
+        xdgTopLevelActivityFinishCallbackMap.remove(xdgToplevel)
     }
 
 
@@ -69,7 +74,12 @@ class SurfaceService : Service() {
                     title = getStringExtra(TinywlXdgTopLevelCallback.TITLE) ?: ""
                     nativePtr = getStringExtra(TinywlXdgTopLevelCallback.NATIVE_PTR)
                 }
-                addXdgTopLevel(xdgTopLevel)
+                val action = getStringExtra(TinywlXdgTopLevelCallback.ACTION)
+
+                if (action == TinywlXdgTopLevelCallback.ACTION_ADD)
+                    addXdgTopLevel(xdgTopLevel)
+                else if (action == TinywlXdgTopLevelCallback.ACTION_REMOVE)
+                    removeXdgTopLevel(xdgTopLevel)
             }
         }
         return super.onStartCommand(intent, flags, startId)
