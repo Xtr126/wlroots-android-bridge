@@ -67,7 +67,7 @@ class SurfaceService : Service() {
                 val xdgTopLevel = XdgTopLevel().apply {
                     appId = getStringExtra(TinywlXdgTopLevelCallback.APP_ID) ?: ""
                     title = getStringExtra(TinywlXdgTopLevelCallback.TITLE) ?: ""
-                    nativePtr = getStringExtra(TinywlXdgTopLevelCallback.NATIVE_PTR)!!.toLong()
+                    nativePtr = getStringExtra(TinywlXdgTopLevelCallback.NATIVE_PTR)
                 }
                 addXdgTopLevel(xdgTopLevel)
             }
