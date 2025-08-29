@@ -1,28 +1,32 @@
 # Why?
-Whilst other projects for running wayland and X11 applications on Android already exist, this is built for efficiency.  
-They use CPU write/read usage flags for buffers and workarounds to get around limitations of proprietary Android drivers. This keeps the buffer entirely in GPU for the whole process of rendering/compositing and presenting to display.  
-It uses gralloc handle data type from minigbm/gbm gralloc headers to extract buffer attributes. Proprietary Android drivers may have their own gralloc instead of minigbm/gbm.  
+Whilst other projects for running wayland and X11 applications on Android already exist, this has proper GPU acceleration and multi window integration.  
+Those projects use CPU write/read usage flags for buffers and workarounds to get around limitations of using proprietary Android drivers.  
+[tinywl-ANativeWindow](https://github.com/Xtr126/tinywl-ANativeWindow) keeps the buffer entirely in GPU for the whole process of rendering/compositing and presenting to display, which is possible with open source mesa drivers.  
+It uses gralloc handle from minigbm/gbm gralloc headers to extract buffer attributes.  
+Proprietary Android drivers may have their own gralloc instead of minigbm/gbm which makes that almost impossible.  
 And then those other projects again use OpenGL ES shaders/drawing commands or Vulkan swapchains to render pixels from the buffer onto egl native window surface which submits the buffer to buffer queue of Android Surface.  
-This uses new special SurfaceControl APIs introduced in APIs 29, 33, 34 and 36 to submit GPU memory buffers to SurfaceFlinger for presentation, avoiding use of EGL/Vulkan.      
-It uses a zero-copy rendering path - wlr_scene directly renders onto a GPU memory buffer allocated by minigbm/gbm gralloc which is then submitted for presenting to display by SurfaceFlinger, supporting hardware overlays (direct scanout) and GPU sampling by Android.  
-GPU acceleration for wlroots gles2/vulkan renderer is provided by mesa in termux (iris and Intel vulkan drivers are confirmed to work).   
+This uses new SurfaceControl/SurfaceTransaction APIs (introduced in APIs 29, 33, 34 and 36) to submit GPU memory buffers to SurfaceFlinger for presentation, avoiding use of EGL/Vulkan.      
+It uses a zero-copy rendering path - client texture is rendered onto a GPU memory buffer allocated by minigbm/gbm gralloc which is then submitted for presenting to display by SurfaceFlinger, supporting hardware overlays (direct scanout) and GPU sampling by Android.  
+GPU acceleration for wlroots gles2/vulkan (either works) renderer is provided by mesa in termux (iris and Intel vulkan drivers are confirmed to work).   
 Therefore performance logically should be within margin of error of the performance in the case of wayland applications running natively on desktop Linux on the exact same hardware.  
-Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly on supported hardware even though Android itself does not support OpenGL.
+Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly on supported hardware even though Android itself does not support desktop OpenGL.
 
 # How it works
-* The Activity receives IBinder remote callback object from bundle when it is started by Tinywl.java, then it callbacks to Tinywl.java as soon as the surface is created. Then, Tinywl.java calls C/C++ code  in libtinywl.so through JNI (libtinywl is built from [tinywl-ANativeWindow](https://github.com/Xtr126/tinywl-ANativeWindow) which starts the tinywl server with a reference to (java)Surface passed through to native code. It creates NDK ANativeWindow from JNI Surface object.
-* [TermuxAm](https://github.com/termux/TermuxAm/) is modified and used as a module to launch the activity of our app from app_process with intent containing bundle with IBinder AIDL callback object
-* `tinywl` module has the code that runs in termux as a cli application in external process (app_process). It has an entry point like a standalone Java application called from cli with args. It takes care of launching the activity and passing the Surface to tinywl.
+* A service in the app receives IBinder objects from a bundle when it recieves an intent by Tinywl app_process, then it starts a new Activity and callbacks to TinywlMainService.cpp AIDL service (using binder) as soon as the surface is created. 
+* [TermuxAm](https://github.com/termux/TermuxAm/) is modified and used as a module to launch the activity of our app from app_process with intent containing bundle with IBinder AIDL callback object obtained from AIBinder in C++ code.
+* `tinywl` module has the code that runs in termux as a cli application in external process (app_process). It has an entry point like a standalone Java application called from cli with args. It takes care of launching the app and receiving binder from NDK AIDL service implementation in native code.
 * tinywl.c/libtinywl.so built with the app is just a placeholder, libtinywl.so from https://github.com/Xtr126/tinywl-ANativeWindow is used instead.
 * Termux is used since it handles the dependencies of wlroots/mesa/wayland for us.
+* It has a wlr_allocator implementation that uses AHardwareBuffers internally, so the tinywl compositor internally uses minigbm gralloc allocated buffers.
+* Each wayland client's texture is rendered onto a buffer, which is then presented on-screen using ASurfaceTransaction_setBuffer.
 
 ## Roadmap
 
 - [x] Vulkan/OpenGL acceleration for clients in chroot and Termux  
 - [x] Display fullscreen output without any glitches
-- [ ] Display individual wayland apps in resizeable Android windows 
-- [ ] Send input events from Android client app to wlroots
-    - [ ] Keyboard+Mouse 
+- [x] Display individual wayland apps in resizeable Android windows 
+- [x] Send input events from Android client app to wlroots
+    - [x] Keyboard+Mouse 
     - [ ] Mouse capture/lock 
     - [ ] Touchscreen
     - [ ] Stylus
@@ -30,7 +34,7 @@ Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly 
 - [ ] LXC/chroot integration
 
 # Build 
-Must have app installed for linking against shared libraries at build time.
+Must have app installed on-device for linking against shared libraries at build time.
 
     # Build in termux environment
     git clone https://github.com/Xtr126/tinywl-ANativeWindow
@@ -61,4 +65,6 @@ Then run the following command in tinywl-ANativeWindow directory (after building
 * [gralloc_handle from libdrm for gbm gralloc](https://gitlab.freedesktop.org/mesa/libdrm) 
 
 # What works now
-28-07-2025: Finally vkcube renders at fluid 60fps without any color/image representation issues, after using `cros_gralloc_handle.h` C++ header from minigbm to extract pixel format, stride, offset, planes and other attributes from allocated AHardwareBuffer.
+28-07-2025: Finally vkcube renders at fluid 60fps without any color/image representation issues, after using `cros_gralloc_handle.h` C++ header from minigbm to extract pixel format, stride, offset, planes and other attributes from allocated AHardwareBuffer.  
+29-08-2025: Multiple windows 
+![IMG_20250829_122825_395](https://github.com/user-attachments/assets/12ac5d5f-ccee-4bd6-a725-cd28a1948280)
