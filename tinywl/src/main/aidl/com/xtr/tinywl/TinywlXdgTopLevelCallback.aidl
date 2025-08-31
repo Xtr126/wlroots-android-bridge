@@ -1,11 +1,9 @@
 // TinywlXdgTopLevelCallback.aidl
 package com.xtr.tinywl;
 
+import com.xtr.tinywl.WlrBox;
+
 interface TinywlXdgTopLevelCallback {
-    const String APP_ID = "APP_ID";
-    const String TITLE = "TITLE";
-    const String NATIVE_PTR = "NATIVE_PTR";
-    const String ACTION = "ACTION";
-    const String ACTION_ADD = "ACTION_ADD";
-    const String ACTION_REMOVE = "ACTION_REMOVE";
+    void addXdgTopLevel(String appId, String title, long nativePtr, in WlrBox geoBox);
+    void removeXdgTopLevel(String appId, String title, long nativePtr);
 }

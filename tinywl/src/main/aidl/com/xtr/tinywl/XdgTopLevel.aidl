@@ -8,5 +8,5 @@ parcelable XdgTopLevel {
     String appId;
     String title;
     Surface surface;
-    String nativePtr;
+    long nativePtr;
 }

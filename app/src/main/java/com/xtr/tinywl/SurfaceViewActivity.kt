@@ -18,6 +18,8 @@ class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
         enableEdgeToEdge()
         bundle = SurfaceViewActivityBundle(intent)
         setTitle(xdgTopLevel.title)
+        window.setTitle(xdgTopLevel.title)
+        actionBar?.title = xdgTopLevel.title
         takeSurface()
         takeInput()
         mService.xdgTopLevelActivityFinishCallbackMap.put(xdgTopLevel, ::finish)

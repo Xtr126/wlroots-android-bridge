@@ -30,7 +30,8 @@ Java_com_xtr_tinywl_Tinywl_nativeGetTinywlSurfaceBinder(JNIEnv *env, jclass claz
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_xtr_tinywl_Tinywl_nativeRegisterXdgTopLevelCallback(JNIEnv *env, jclass clazz) {
+Java_com_xtr_tinywl_Tinywl_nativeRegisterXdgTopLevelCallback(JNIEnv *env, jclass clazz,
+                                                             jobject binder) {
     // TODO: implement nativeRegisterXdgTopLevelCallback()
 }
 extern "C"

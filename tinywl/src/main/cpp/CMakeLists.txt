@@ -26,6 +26,7 @@ add_library(aidl_shared SHARED
         ${aidl_source_output_dir}/com/android/server/inputflinger/IInputFilter.cpp
         ${aidl_source_output_dir}/com/android/server/inputflinger/KeyEvent.cpp
         ${aidl_source_output_dir}/com/xtr/tinywl/XdgTopLevel.cpp
+        ${aidl_source_output_dir}/com/xtr/tinywl/WlrBox.cpp
         ${aidl_source_output_dir}/com/xtr/tinywl/ITinywlMain.cpp
         ${aidl_source_output_dir}/com/xtr/tinywl/ITinywlSurface.cpp
         ${aidl_source_output_dir}/com/xtr/tinywl/TinywlXdgTopLevelCallback.cpp

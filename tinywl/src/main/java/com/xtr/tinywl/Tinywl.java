@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 
 import com.termux.termuxam.Am;
 
@@ -16,7 +17,7 @@ public class Tinywl {
 
     private static native IBinder nativeGetTinywlInputServiceBinder();
     private static native IBinder nativeGetTinywlSurfaceBinder();
-    private static native void nativeRegisterXdgTopLevelCallback();
+    private static native void nativeRegisterXdgTopLevelCallback(IBinder binder);
     private static native void runTinywlLoop();
 
     public static void main(String[] args) {
@@ -31,8 +32,8 @@ public class Tinywl {
                 data.putBinder(BINDER_KEY_TINYWL_SURFACE, nativeGetTinywlSurfaceBinder());
                 data.putBinder(BINDER_KEY_TINYWL_MAIN, new ITinywlMain.Stub() {
                     @Override
-                    public void registerXdgTopLevelCallback() {
-                        nativeRegisterXdgTopLevelCallback();
+                    public void registerXdgTopLevelCallback(TinywlXdgTopLevelCallback xdgTopLevelCallback) throws RemoteException {
+                        nativeRegisterXdgTopLevelCallback(xdgTopLevelCallback.asBinder());
                     }
                 });
                 Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-activity", "-n", "com.xtr.tinywl/.MainActivity"});

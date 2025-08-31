@@ -1,9 +1,12 @@
 package com.xtr.tinywl
 
+import android.app.ActivityOptions
 import android.app.Service
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Binder
 import android.os.IBinder
+import android.util.Log
 import android.view.InputQueue
 import android.view.Surface
 
@@ -35,22 +38,50 @@ class SurfaceService : Service() {
 
     val xdgTopLevelActivityFinishCallbackMap = mutableMapOf<XdgTopLevel, () -> Unit>()
 
-    fun addXdgTopLevel(xdgToplevel: XdgTopLevel) {
-        val bundle = SurfaceViewActivityBundle(
-            binder, xdgToplevel
-        )
-        val intent = Intent(this@SurfaceService, SurfaceViewActivity::class.java)
-        bundle.putTo(intent)
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(intent)
-    }
 
-    fun removeXdgTopLevel(xdgToplevel: XdgTopLevel) {
-        // Invoke the callback to finish the activity
-        xdgTopLevelActivityFinishCallbackMap[xdgToplevel]?.invoke()
-        xdgTopLevelActivityFinishCallbackMap.remove(xdgToplevel)
-    }
+    private val mXdgTopLevelCallback = object : TinywlXdgTopLevelCallback.Stub() {
+        override fun addXdgTopLevel(
+            appId: String?,
+            title: String?,
+            nativePtr: Long,
+            geoBox: WlrBox?
+        ) {
+            val xdgToplevel = XdgTopLevel().apply {
+                this.appId = appId
+                this.title = title
+                this.nativePtr = nativePtr
+            }
+            val bundle = SurfaceViewActivityBundle(
+                binder, xdgToplevel
+            )
+            val intent = Intent(this@SurfaceService, SurfaceViewActivity::class.java)
+            bundle.putTo(intent)
+            intent
+            intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent, ActivityOptions.makeBasic().apply {
+                setLaunchBounds(Rect().apply {
+                    left = geoBox!!.x                     // left = same as x
+                    top = geoBox.y                     // top  = same as y
+                    right = geoBox.x + geoBox.width - 1     // right: exclusive-end minus 1 -> inclusive-end
+                    bottom = geoBox.y + geoBox.height - 1     // bottom: exclusive-end minus 1 -> inclusive-end
+                })
+            }.toBundle())
+        }
 
+        override fun removeXdgTopLevel(
+            appId: String?,
+            title: String?,
+            nativePtr: Long
+        ) {
+            xdgTopLevelActivityFinishCallbackMap.filterKeys { it.nativePtr == nativePtr }.forEach { (xdgTopLevel, finishCallback) ->
+                // Invoke the callback to finish the activity and remove from the map
+                finishCallback.invoke()
+                xdgTopLevelActivityFinishCallbackMap.remove(xdgTopLevel)
+            }
+
+        }
+
+    }
 
     override fun onStartCommand(
         intent: Intent?,
@@ -65,23 +96,8 @@ class SurfaceService : Service() {
                 mService = ITinywlSurface.Stub.asInterface(getBinder(Tinywl.BINDER_KEY_TINYWL_SURFACE))
                 ITinywlMain.Stub
                     .asInterface(getBinder(Tinywl.BINDER_KEY_TINYWL_MAIN))
-                    .registerXdgTopLevelCallback()
-            } ?:
-        intent?.apply {
-            if (getStringExtra(TinywlXdgTopLevelCallback.NATIVE_PTR) != null) {
-                val xdgTopLevel = XdgTopLevel().apply {
-                    appId = getStringExtra(TinywlXdgTopLevelCallback.APP_ID) ?: ""
-                    title = getStringExtra(TinywlXdgTopLevelCallback.TITLE) ?: ""
-                    nativePtr = getStringExtra(TinywlXdgTopLevelCallback.NATIVE_PTR)
-                }
-                val action = getStringExtra(TinywlXdgTopLevelCallback.ACTION)
-
-                if (action == TinywlXdgTopLevelCallback.ACTION_ADD)
-                    addXdgTopLevel(xdgTopLevel)
-                else if (action == TinywlXdgTopLevelCallback.ACTION_REMOVE)
-                    removeXdgTopLevel(xdgTopLevel)
+                    .registerXdgTopLevelCallback(mXdgTopLevelCallback)
             }
-        }
         return super.onStartCommand(intent, flags, startId)
     }
 
