@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.InputQueue
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 
@@ -18,11 +19,17 @@ class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
         enableEdgeToEdge()
         bundle = SurfaceViewActivityBundle(intent)
         setTitle(xdgTopLevel.title)
-        window.setTitle(xdgTopLevel.title)
         actionBar?.title = xdgTopLevel.title
         takeSurface()
         takeInput()
         mService.xdgTopLevelActivityFinishCallbackMap.put(xdgTopLevel, ::finish)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            window.insetsController?.setSystemBarsAppearance(
+                WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND,
+                WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND
+            )
+        }
     }
 
 
