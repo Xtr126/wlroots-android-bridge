@@ -3,13 +3,30 @@ package com.xtr.tinywl
 import android.os.Build
 import android.os.Bundle
 import android.view.InputQueue
-import android.view.SurfaceHolder
-import android.view.SurfaceView
 import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.AndroidExternalSurface
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 
-class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
+class SurfaceViewActivity : ComponentActivity() {
 
     lateinit var bundle: SurfaceViewActivityBundle
     val xdgTopLevel get() = bundle.xdgTopLevel
@@ -19,7 +36,6 @@ class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
         enableEdgeToEdge()
         bundle = SurfaceViewActivityBundle(intent)
         setTitle(xdgTopLevel.title)
-        actionBar?.title = xdgTopLevel.title
         takeSurface()
         takeInput()
         mService.xdgTopLevelActivityFinishCallbackMap.put(xdgTopLevel, ::finish)
@@ -32,56 +48,86 @@ class SurfaceViewActivity : ComponentActivity(), SurfaceHolder.Callback {
         }
     }
 
+    @Preview(showBackground = true)
+    @Composable
+    fun ExternalSurfaceWithTopCaption(text: String = "Top Caption") {
+        val captionBarHeight = WindowInsets.captionBar
+            .getTop(LocalDensity.current)
+            .let { top ->
+                when {
+                    top > 0 -> top
+                    else -> 40
+                }
+            }
+
+        val leftCaptionBarInset = WindowInsets.captionBar
+            .getLeft(LocalDensity.current, LocalLayoutDirection.current)
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Box(Modifier
+                .fillMaxWidth()
+                .padding(start = leftCaptionBarInset.dp)
+                .height(captionBarHeight.dp),
+                contentAlignment = Alignment.CenterStart) {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.titleSmall,
+                )
+            }
+
+            // External surface
+            AndroidExternalSurface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                isOpaque = false
+            ) {
+                // A surface is available, we can start rendering
+               onSurface { surface, width, height ->
+                   mService.onSurfaceCreated(
+                       xdgTopLevel,
+                       surface,
+                   )
+
+                   // React to surface dimension changes
+                   surface.onChanged { newWidth, newHeight ->
+                       mService.onSurfaceChanged(
+                           xdgTopLevel,
+                           surface = this,
+                       )
+                   }
+
+                   // Cleanup if needed
+                   surface.onDestroyed {
+                       mService.onSurfaceDestroyed(xdgTopLevel)
+                   }
+
+               }
+            }
+
+
+        }
+
+    }
+
 
     val mService get() = bundle.binder.getService()
 
-    override fun surfaceCreated(holder: SurfaceHolder) {
-        mService.onSurfaceCreated(
-            xdgTopLevel,
-            holder.surface,
-        )
-    }
 
-    override fun surfaceChanged(
-        holder: SurfaceHolder,
-        format: Int,
-        width: Int,
-        height: Int
-    ) {
-        mService.onSurfaceChanged(
-            xdgTopLevel,
-            holder.surface,
-        )
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder) {
-        mService.onSurfaceDestroyed(xdgTopLevel)
-    }
     private fun takeSurface() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            /*
-             * Only usable in Android 15 due to
-             * ASurfaceControl_createFromWindow returning NULL
-             * for root ANativeWindow: https://issuetracker.google.com/issues/320706287
-             */
-//            window.takeSurface(this)
-            // TODO: request focus for window.takeSurface
-            SurfaceView(this).also {
-                it.holder.addCallback(this)
-                setContentView(it)
-                it.requestFocus()
-            }
-        } else {
-            /*
-             * On Android 14 and older we use a SurfaceView
-             * instead of taking ownership of our window's surface.
-             */
-            SurfaceView(this).also {
-                it.holder.addCallback(this)
-                setContentView(it)
-                it.requestFocus()
-            }
+        /*
+         * Only usable in Android 15 due to
+         * ASurfaceControl_createFromWindow returning NULL
+         * for root ANativeWindow: https://issuetracker.google.com/issues/320706287
+         */
+         // window.takeSurface(this) TODO: request focus for window.takeSurface
+        setContent {
+            ExternalSurfaceWithTopCaption(xdgTopLevel.title ?: "")
         }
+
     }
     private fun takeInput() {
         // TODO: Use AInputReceiver APIs for Android >= 15

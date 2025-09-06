@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.Rect
 import android.os.Binder
 import android.os.IBinder
-import android.util.Log
 import android.view.InputQueue
 import android.view.Surface
 
@@ -40,6 +39,8 @@ class SurfaceService : Service() {
 
 
     private val mXdgTopLevelCallback = object : TinywlXdgTopLevelCallback.Stub() {
+        var captionBarHeight: Int = 0
+
         override fun addXdgTopLevel(
             appId: String?,
             title: String?,
@@ -58,10 +59,11 @@ class SurfaceService : Service() {
             bundle.putTo(intent)
             intent
             intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+
             startActivity(intent, ActivityOptions.makeBasic().apply {
                 setLaunchBounds(Rect().apply {
                     left = geoBox!!.x                     // left = same as x
-                    top = geoBox.y                     // top  = same as y
+                    top = geoBox.y - captionBarHeight                    // top  = same as y
                     right = geoBox.x + geoBox.width - 1     // right: exclusive-end minus 1 -> inclusive-end
                     bottom = geoBox.y + geoBox.height - 1     // bottom: exclusive-end minus 1 -> inclusive-end
                 })
@@ -94,6 +96,10 @@ class SurfaceService : Service() {
             ?.apply {
                 nativeInputBinderReceived(getBinder(Tinywl.BINDER_KEY_TINYWL_INPUT)!!)
                 mService = ITinywlSurface.Stub.asInterface(getBinder(Tinywl.BINDER_KEY_TINYWL_SURFACE))
+
+                if (mXdgTopLevelCallback.captionBarHeight == 0)
+                    mXdgTopLevelCallback.captionBarHeight = intent.getIntExtra("CAPTION_BAR_HEIGHT", 0)
+
                 ITinywlMain.Stub
                     .asInterface(getBinder(Tinywl.BINDER_KEY_TINYWL_MAIN))
                     .registerXdgTopLevelCallback(mXdgTopLevelCallback)
