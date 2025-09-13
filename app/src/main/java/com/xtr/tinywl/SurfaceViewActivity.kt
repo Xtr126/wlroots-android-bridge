@@ -21,8 +21,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -46,22 +46,16 @@ class SurfaceViewActivity : ComponentActivity() {
                 WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND
             )
         }
+        window.setBackgroundBlurRadius(40)
     }
 
     @Preview(showBackground = true)
     @Composable
-    fun ExternalSurfaceWithTopCaption(text: String = "Top Caption") {
-        val captionBarHeight = WindowInsets.captionBar
-            .getTop(LocalDensity.current)
-            .let { top ->
-                when {
-                    top > 0 -> top
-                    else -> 40
-                }
-            }
-
-        val leftCaptionBarInset = WindowInsets.captionBar
-            .getLeft(LocalDensity.current, LocalLayoutDirection.current)
+    fun ExternalSurfaceWithTopCaption(
+        text: String = "Top Caption",
+        leftCaptionBarInset: Int = 40,
+        captionBarHeight: Int = 40,
+    ) {
 
         Column(
             modifier = Modifier
@@ -75,6 +69,7 @@ class SurfaceViewActivity : ComponentActivity() {
                 Text(
                     text = text,
                     style = MaterialTheme.typography.titleSmall,
+                    color = Color.White
                 )
             }
 
@@ -125,7 +120,20 @@ class SurfaceViewActivity : ComponentActivity() {
          */
          // window.takeSurface(this) TODO: request focus for window.takeSurface
         setContent {
-            ExternalSurfaceWithTopCaption(xdgTopLevel.title ?: "")
+            var leftCaptionBarInset = 0
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                val boundingRects =
+                    window.decorView.rootWindowInsets.getBoundingRects(android.view.WindowInsets.Type.captionBar())
+                for (rect in boundingRects) {
+                    if (rect.left == 0) leftCaptionBarInset += rect.right
+                }
+            }
+
+            val captionBarHeight = WindowInsets.captionBar
+                .getTop(LocalDensity.current)
+
+            ExternalSurfaceWithTopCaption(xdgTopLevel.title ?: "", leftCaptionBarInset, captionBarHeight)
         }
 
     }
