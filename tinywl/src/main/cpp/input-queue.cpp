@@ -118,62 +118,93 @@ static KeyEvent KeyEvent_fromAInputEvent(AInputEvent *event) {
 }
 
 static std::shared_ptr<ITinywlInput> callback = nullptr;
+static JavaVM *javaVM = nullptr;
 
-static jobject jQueueRef = nullptr;
+struct poll_source {
+    long nativePtr = -1;
+    // When non-NULL, this is the input queue from which the app will
+    // receive user input events.
+    AInputQueue *inputQueue = nullptr;
+    jobject jQueueRef = nullptr;
+};
 
 static int ALooper_callback(int fd, int events, void* data){
-    auto* inputQueue = (AInputQueue*)data;
-    if (callback == nullptr || inputQueue == nullptr) return 0;
+    auto* pPollSource = (poll_source*)data;
+    if (callback == nullptr || pPollSource == nullptr) return 0;
 
     AInputEvent* event = nullptr;
 
-    while (AInputQueue_getEvent(inputQueue, &event) >= 0) {
-        if (AInputQueue_preDispatchEvent(inputQueue, event)) {
+    while (AInputQueue_getEvent(pPollSource->inputQueue, &event) >= 0) {
+        if (AInputQueue_preDispatchEvent(pPollSource->inputQueue, event)) {
             continue;
         }
         bool handled = false;
 
         if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
             MotionEvent motionEvent = MotionEvent_fromAInputEvent(event);
-            callback->onMotionEvent(motionEvent, &handled);
+            callback->onMotionEvent(motionEvent, pPollSource->nativePtr, &handled);
         }
         else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
             KeyEvent keyEvent = KeyEvent_fromAInputEvent(event);
-            callback->onKeyEvent(keyEvent, &handled);
+            callback->onKeyEvent(keyEvent, pPollSource->nativePtr, &handled);
         }
 
-        AInputQueue_finishEvent(inputQueue, event, handled);
+        AInputQueue_finishEvent(pPollSource->inputQueue, event, handled);
     }
-
+    JNIEnv* env;
+    javaVM->GetEnv((void**)&env, JNI_VERSION_1_6);
+    env->DeleteGlobalRef(pPollSource->jQueueRef);
+    delete pPollSource;
     return 1;
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_xtr_tinywl_SurfaceViewActivity_nativeOnInputQueueCreated(JNIEnv *env, jobject thiz,
-                                                                  jobject jQueue) {
-    if (jQueueRef != nullptr) env->DeleteGlobalRef(jQueueRef);
-    jQueueRef = env->NewGlobalRef(jQueue);
-
-    AInputQueue *inputQueue = AInputQueue_fromJava(env, jQueueRef);
-    AInputQueue_attachLooper(inputQueue, ALooper_forThread(), 1, ALooper_callback, inputQueue);
-}
-\
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_xtr_tinywl_SurfaceServiceKt_nativeInputBinderReceived(JNIEnv *env, jclass clazz,
-                                                               jobject binder) {
+void OnInputBinderReceived(JNIEnv *env, jclass, jobject binder) {
     AIBinder* pBinder = AIBinder_fromJavaBinder(env, binder);
     const ::ndk::SpAIBinder spBinder(pBinder);
     callback = ITinywlInput::fromBinder(spBinder);
 }
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_xtr_tinywl_SurfaceServiceKt_nativeOnInputQueueCreated(JNIEnv *env, jclass clazz,
-                                                               jobject jQueue) {
-    if (jQueueRef != nullptr) env->DeleteGlobalRef(jQueueRef);
-    jQueueRef = env->NewGlobalRef(jQueue);
+void OnInputQueueCreated(JNIEnv *env, jclass, jobject jQueue, jlong native_ptr) {
+    auto *pollSource = new (std::nothrow) poll_source();
+    pollSource->jQueueRef = env->NewGlobalRef(jQueue);
+    pollSource->nativePtr = native_ptr;
+    pollSource->inputQueue = AInputQueue_fromJava(env, pollSource->jQueueRef);
+    AInputQueue_attachLooper(pollSource->inputQueue, ALooper_forThread(), 1, ALooper_callback, pollSource);
+}
 
-    AInputQueue *inputQueue = AInputQueue_fromJava(env, jQueueRef);
-    AInputQueue_attachLooper(inputQueue, ALooper_forThread(), 1, ALooper_callback, inputQueue);
+template <typename T, size_t N>
+char (&ArraySizeHelper(T (&array)[N]))[N];  // NOLINT(readability/casting)
+
+#define arraysize(array) (sizeof(ArraySizeHelper(array)))
+
+/*
+ * processing one time initialization:
+ *     Cache the javaVM into our context
+ *     Register native methods
+ *     Find class ID for JniHandler
+ *     Create an instance of JniHandler
+ *     Make global reference since we are using them from a native thread
+ * Note:
+ *     All resources allocated here are never released by application
+ *     we rely on system to free all global refs when it goes away;
+ *     the pairing function JNI_OnUnload() never gets called at all.
+ */
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
+    JNIEnv* env;
+    javaVM = vm;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        return JNI_ERR;  // JNI version not supported.
+    }
+
+    jclass c = env->FindClass("com/xtr/tinywl/SurfaceServiceKt");
+    if (c == nullptr) return JNI_ERR;
+
+    static const JNINativeMethod methods[] = {
+            {"nativeInputBinderReceived", "(Landroid/os/IBinder;)V",
+                    reinterpret_cast<void *>(OnInputBinderReceived)},
+            {"nativeOnInputQueueCreated", "(Landroid/view/InputQueue;J)V", reinterpret_cast<void*>(OnInputQueueCreated)},
+    };
+    int rc = env->RegisterNatives(c, methods, arraysize(methods));
+    if (rc != JNI_OK) return rc;
+
+    return JNI_VERSION_1_6;
 }

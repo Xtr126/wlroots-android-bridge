@@ -143,7 +143,7 @@ class SurfaceViewActivity : ComponentActivity() {
         // We take the input queue and use in native code for Android 13/14
         window.takeInputQueue(object : InputQueue.Callback {
             override fun onInputQueueCreated(queue: InputQueue) {
-                nativeOnInputQueueCreated(queue)
+                nativeOnInputQueueCreated(queue, xdgTopLevel.nativePtr)
             }
 
             override fun onInputQueueDestroyed(queue: InputQueue) {
