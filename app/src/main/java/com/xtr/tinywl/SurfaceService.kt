@@ -10,7 +10,8 @@ import android.view.InputQueue
 import android.view.Surface
 
 external fun nativeInputBinderReceived(binder: IBinder)
-external fun nativeOnInputQueueCreated(queue: InputQueue, nativePtr: Long)
+external fun nativeOnInputQueueCreated(queue: InputQueue, nativePtr: Long): Long
+external fun nativeOnInputQueueDestroyed(nativePtr: Long)
 
 class SurfaceService : Service() {
     companion object {

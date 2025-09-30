@@ -118,7 +118,6 @@ static KeyEvent KeyEvent_fromAInputEvent(AInputEvent *event) {
 }
 
 static std::shared_ptr<ITinywlInput> callback = nullptr;
-static JavaVM *javaVM = nullptr;
 
 struct poll_source {
     long nativePtr = -1;
@@ -151,10 +150,6 @@ static int ALooper_callback(int fd, int events, void* data){
 
         AInputQueue_finishEvent(pPollSource->inputQueue, event, handled);
     }
-    JNIEnv* env;
-    javaVM->GetEnv((void**)&env, JNI_VERSION_1_6);
-    env->DeleteGlobalRef(pPollSource->jQueueRef);
-    delete pPollSource;
     return 1;
 }
 
@@ -163,12 +158,20 @@ void OnInputBinderReceived(JNIEnv *env, jclass, jobject binder) {
     const ::ndk::SpAIBinder spBinder(pBinder);
     callback = ITinywlInput::fromBinder(spBinder);
 }
-void OnInputQueueCreated(JNIEnv *env, jclass, jobject jQueue, jlong native_ptr) {
+
+jlong OnInputQueueCreated(JNIEnv *env, jclass, jobject jQueue, jlong native_ptr) {
     auto *pollSource = new (std::nothrow) poll_source();
     pollSource->jQueueRef = env->NewGlobalRef(jQueue);
     pollSource->nativePtr = native_ptr;
     pollSource->inputQueue = AInputQueue_fromJava(env, pollSource->jQueueRef);
     AInputQueue_attachLooper(pollSource->inputQueue, ALooper_forThread(), 1, ALooper_callback, pollSource);
+    return reinterpret_cast<long>(pollSource);
+}
+
+void OnInputQueueDestroyed(JNIEnv *env, jclass, jlong native_ptr) {
+    auto *pPollSource = (poll_source*)native_ptr;
+    env->DeleteGlobalRef(pPollSource->jQueueRef);
+    delete pPollSource;
 }
 
 template <typename T, size_t N>
@@ -178,11 +181,8 @@ char (&ArraySizeHelper(T (&array)[N]))[N];  // NOLINT(readability/casting)
 
 /*
  * processing one time initialization:
- *     Cache the javaVM into our context
  *     Register native methods
  *     Find class ID for JniHandler
- *     Create an instance of JniHandler
- *     Make global reference since we are using them from a native thread
  * Note:
  *     All resources allocated here are never released by application
  *     we rely on system to free all global refs when it goes away;
@@ -190,7 +190,6 @@ char (&ArraySizeHelper(T (&array)[N]))[N];  // NOLINT(readability/casting)
  */
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
     JNIEnv* env;
-    javaVM = vm;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;  // JNI version not supported.
     }
@@ -201,7 +200,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
     static const JNINativeMethod methods[] = {
             {"nativeInputBinderReceived", "(Landroid/os/IBinder;)V",
                     reinterpret_cast<void *>(OnInputBinderReceived)},
-            {"nativeOnInputQueueCreated", "(Landroid/view/InputQueue;J)V", reinterpret_cast<void*>(OnInputQueueCreated)},
+            {"nativeOnInputQueueCreated", "(Landroid/view/InputQueue;J)J", reinterpret_cast<void*>(OnInputQueueCreated)},
+            {"nativeOnInputQueueDestroyed", "(J)V", reinterpret_cast<void*>(OnInputQueueDestroyed)},
     };
     int rc = env->RegisterNatives(c, methods, arraysize(methods));
     if (rc != JNI_OK) return rc;
