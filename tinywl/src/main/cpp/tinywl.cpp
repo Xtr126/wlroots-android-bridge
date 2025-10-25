@@ -36,6 +36,6 @@ Java_com_xtr_tinywl_Tinywl_nativeRegisterXdgTopLevelCallback(JNIEnv *env, jclass
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_xtr_tinywl_Tinywl_runTinywlLoop(JNIEnv *env, jclass clazz) {
+Java_com_xtr_tinywl_Tinywl_runTinywlLoop(JNIEnv *env, jclass clazz, jobjectArray args) {
     // TODO: implement runTinywlLoop()
 }

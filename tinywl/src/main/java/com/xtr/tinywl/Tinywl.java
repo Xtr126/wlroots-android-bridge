@@ -18,7 +18,7 @@ public class Tinywl {
     private static native IBinder nativeGetTinywlInputServiceBinder();
     private static native IBinder nativeGetTinywlSurfaceBinder();
     private static native void nativeRegisterXdgTopLevelCallback(IBinder binder);
-    private static native void runTinywlLoop();
+    private static native void runTinywlLoop(String[] args);
 
     public static void main(String[] args) {
         try {
@@ -37,7 +37,7 @@ public class Tinywl {
                     }
                 });
                 Integer exitCode = new Am(data, EXTRA_KEY).run(new String[]{"start-activity", "-n", "com.xtr.tinywl/.MainActivity"});
-                runTinywlLoop();
+                runTinywlLoop(args);
             });
 
             Looper.loop();
