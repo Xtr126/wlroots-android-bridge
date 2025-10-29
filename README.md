@@ -64,6 +64,25 @@ Then run the following command in tinywl-ANativeWindow directory (after building
 * [minigbm(cros_gralloc_handle.h)](http://android.googlesource.com/platform/external/minigbm/) 
 * [gralloc_handle from libdrm for gbm gralloc](https://gitlab.freedesktop.org/mesa/libdrm) 
 
+## Copyright and License
+The source code is licensed under the GPL v3.   
+```
+wlroots-android-bridge
+Copyright (C) 2025 Xtr126 <k.gunetilleke@gmail.com>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 3.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License 
+along with this program. If not, see https://www.gnu.org/licenses/.
+```
+
 # What works now
 28-07-2025: Finally vkcube renders at fluid 60fps without any color/image representation issues, after using `cros_gralloc_handle.h` C++ header from minigbm to extract pixel format, stride, offset, planes and other attributes from allocated AHardwareBuffer.  
 29-08-2025: Multiple windows 
