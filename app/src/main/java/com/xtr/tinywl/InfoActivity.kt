@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Info
@@ -61,10 +63,11 @@ class InfoActivity : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     private fun App() {
+        val scrollState = rememberScrollState()
         AppTheme {
             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 Box (modifier = Modifier.padding(innerPadding)) {
-                    Column (modifier = Modifier.padding(20.dp)) {
+                    Column (modifier = Modifier.padding(20.dp).verticalScroll(scrollState)) {
                         BuildInfo()
                         Spacer(modifier = Modifier.height(12.dp))
                         UsageInfo()
