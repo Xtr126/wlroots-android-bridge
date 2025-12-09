@@ -35,6 +35,7 @@ import kotlin.jvm.java
 
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -82,6 +83,9 @@ android {
     }
 
     ndkVersion = "28.0.13004108"
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
