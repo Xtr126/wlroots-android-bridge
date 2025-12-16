@@ -2,11 +2,14 @@
 package com.xtr.tinywl;
 
 // Declare any non-default types here with import statements
-import android.view.Surface;
 
 parcelable XdgTopLevel {
+    enum NativePtrType {
+        VIEW,
+        OUTPUT,
+    }
     String appId;
     String title;
-    Surface surface;
+    NativePtrType nativePtrType;
     long nativePtr;
 }

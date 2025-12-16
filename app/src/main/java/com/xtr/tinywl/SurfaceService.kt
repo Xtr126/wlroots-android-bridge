@@ -42,28 +42,17 @@ class SurfaceService : Service() {
     private val mXdgTopLevelCallback = object : TinywlXdgTopLevelCallback.Stub() {
         var captionBarHeight: Int = 0
 
-        override fun addXdgTopLevel(
-            appId: String?,
-            title: String?,
-            nativePtr: Long,
-            geoBox: WlrBox?
-        ) {
-            val xdgToplevel = XdgTopLevel().apply {
-                this.appId = appId
-                this.title = title
-                this.nativePtr = nativePtr
-            }
+        override fun addXdgTopLevel(xdgTopLevel: XdgTopLevel, geoBox: WlrBox) {
             val bundle = SurfaceViewActivityBundle(
-                binder, xdgToplevel
+                binder, xdgTopLevel
             )
             val intent = Intent(this@SurfaceService, SurfaceViewActivity::class.java)
             bundle.putTo(intent)
-            intent
             intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
 
             startActivity(intent, ActivityOptions.makeBasic().apply {
                 setLaunchBounds(Rect().apply {
-                    left = geoBox!!.x                     // left = same as x
+                    left = geoBox.x                     // left = same as x
                     top = geoBox.y - captionBarHeight                    // top  = same as y
                     right = geoBox.x + geoBox.width - 1     // right: exclusive-end minus 1 -> inclusive-end
                     bottom = geoBox.y + geoBox.height - 1     // bottom: exclusive-end minus 1 -> inclusive-end
@@ -71,12 +60,8 @@ class SurfaceService : Service() {
             }.toBundle())
         }
 
-        override fun removeXdgTopLevel(
-            appId: String?,
-            title: String?,
-            nativePtr: Long
-        ) {
-            xdgTopLevelActivityFinishCallbackMap.filterKeys { it.nativePtr == nativePtr }.forEach { (xdgTopLevel, finishCallback) ->
+        override fun removeXdgTopLevel(xdgTopLevel: XdgTopLevel) {
+            xdgTopLevelActivityFinishCallbackMap.filterKeys { it.nativePtr == xdgTopLevel.nativePtr }.forEach { (xdgTopLevel, finishCallback) ->
                 // Invoke the callback to finish the activity and remove from the map
                 finishCallback.invoke()
                 xdgTopLevelActivityFinishCallbackMap.remove(xdgTopLevel)
@@ -91,8 +76,6 @@ class SurfaceService : Service() {
         flags: Int,
         startId: Int
     ): Int {
-
-
         intent?.getBundleExtra(Tinywl.EXTRA_KEY)
             ?.apply {
                 nativeInputBinderReceived(getBinder(Tinywl.BINDER_KEY_TINYWL_INPUT)!!)
@@ -113,27 +96,10 @@ class SurfaceService : Service() {
     /**
      * Called by activities when a surface is available
      */
-    fun onSurfaceCreated(
-        xdgTopLevel: XdgTopLevel,
-        surface: Surface,
-    ) {
-        // Now surface is available, call to wlroots and make it render to it
-        xdgTopLevel.surface = surface
-        mService.onSurfaceCreated(xdgTopLevel)
-    }
+    fun onSurfaceCreated(xdgTopLevel: XdgTopLevel, surface: Surface) = mService::onSurfaceCreated
 
-    fun onSurfaceChanged(
-        xdgTopLevel: XdgTopLevel,
-        surface: Surface,
-    ) {
-        // Call to wlroots and resize xdg toplevel now
-        xdgTopLevel.surface = surface
-        mService.onSurfaceChanged(xdgTopLevel)
-    }
+    fun onSurfaceChanged(xdgTopLevel: XdgTopLevel, surface: Surface) = mService::onSurfaceChanged
 
-    fun onSurfaceDestroyed(xdgTopLevel: XdgTopLevel) {
-        // Call to wlroots and unmap xdg toplevel now
-        mService.onSurfaceDestroyed(xdgTopLevel)
-    }
+    fun onSurfaceDestroyed(xdgTopLevel: XdgTopLevel) = mService::onSurfaceDestroyed
 
 }

@@ -2,8 +2,9 @@
 package com.xtr.tinywl;
 
 import com.xtr.tinywl.WlrBox;
+import com.xtr.tinywl.XdgTopLevel;
 
 interface TinywlXdgTopLevelCallback {
-    void addXdgTopLevel(String appId, String title, long nativePtr, in WlrBox geoBox);
-    void removeXdgTopLevel(String appId, String title, long nativePtr);
+    void addXdgTopLevel(in XdgTopLevel xdgTopLevel, in WlrBox geoBox);
+    void removeXdgTopLevel(in XdgTopLevel xdgTopLevel);
 }

@@ -13,7 +13,7 @@ class SurfaceViewActivityBundle(
         data: Bundle,
     ) : this(
         binder = data.getBinder("BINDER_KEY") as SurfaceService.LocalBinder,
-        xdgTopLevel = data.getParcelable<XdgTopLevel>("XDG_TOP_LEVEL")!!
+        xdgTopLevel = data.getParcelable("XDG_TOP_LEVEL", XdgTopLevel::class.java)!!
     )
 
     constructor(intent: Intent) : this(intent.extras!!)

@@ -38,7 +38,7 @@ class SurfaceViewActivity : ComponentActivity() {
         setTitle(xdgTopLevel.title)
         takeSurface()
         takeInput()
-        mService.xdgTopLevelActivityFinishCallbackMap.put(xdgTopLevel, ::finish)
+        mService.xdgTopLevelActivityFinishCallbackMap[xdgTopLevel] = ::finish
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             window.insetsController?.setSystemBarsAppearance(
