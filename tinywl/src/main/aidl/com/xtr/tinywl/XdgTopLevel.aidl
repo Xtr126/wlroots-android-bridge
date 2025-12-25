@@ -2,12 +2,9 @@
 package com.xtr.tinywl;
 
 // Declare any non-default types here with import statements
+import com.xtr.tinywl.NativePtrType;
 
 parcelable XdgTopLevel {
-    enum NativePtrType {
-        VIEW,
-        OUTPUT,
-    }
     String appId;
     String title;
     NativePtrType nativePtrType;

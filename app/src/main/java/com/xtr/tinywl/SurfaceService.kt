@@ -96,10 +96,10 @@ class SurfaceService : Service() {
     /**
      * Called by activities when a surface is available
      */
-    fun onSurfaceCreated(xdgTopLevel: XdgTopLevel, surface: Surface) = mService::onSurfaceCreated
+    fun onSurfaceCreated(xdgTopLevel: XdgTopLevel, surface: Surface) = mService.onSurfaceCreated(xdgTopLevel.nativePtr, xdgTopLevel.nativePtrType, surface)
 
-    fun onSurfaceChanged(xdgTopLevel: XdgTopLevel, surface: Surface) = mService::onSurfaceChanged
+    fun onSurfaceChanged(xdgTopLevel: XdgTopLevel, surface: Surface) = mService.onSurfaceChanged(xdgTopLevel.nativePtr, xdgTopLevel.nativePtrType, surface)
 
-    fun onSurfaceDestroyed(xdgTopLevel: XdgTopLevel) = mService::onSurfaceDestroyed
+    fun onSurfaceDestroyed(xdgTopLevel: XdgTopLevel) = mService.onSurfaceDestroyed(xdgTopLevel.nativePtr, xdgTopLevel.nativePtrType)
 
 }

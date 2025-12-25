@@ -108,9 +108,7 @@ class SurfaceViewActivity : ComponentActivity() {
 
     }
 
-
     val mService get() = bundle.binder.getService()
-
 
     private fun takeSurface() {
         /*
