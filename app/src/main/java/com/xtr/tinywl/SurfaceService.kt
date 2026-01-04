@@ -8,6 +8,7 @@ import android.os.Binder
 import android.os.IBinder
 import android.view.InputQueue
 import android.view.Surface
+import kotlin.system.exitProcess
 
 external fun nativeInputBinderReceived(binder: IBinder)
 external fun nativeOnInputQueueCreated(queue: InputQueue, nativePtr: Long): Long
@@ -84,9 +85,10 @@ class SurfaceService : Service() {
                 if (mXdgTopLevelCallback.captionBarHeight == 0)
                     mXdgTopLevelCallback.captionBarHeight = intent.getIntExtra("CAPTION_BAR_HEIGHT", 0)
 
-                ITinywlMain.Stub
+                val tinywlMain = ITinywlMain.Stub
                     .asInterface(getBinder(Tinywl.BINDER_KEY_TINYWL_MAIN))
-                    .registerXdgTopLevelCallback(mXdgTopLevelCallback)
+                tinywlMain.registerXdgTopLevelCallback(mXdgTopLevelCallback)
+                tinywlMain.asBinder().linkToDeath({ exitProcess(0) },0)
             }
         return super.onStartCommand(intent, flags, startId)
     }

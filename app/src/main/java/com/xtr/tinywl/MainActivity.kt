@@ -88,6 +88,7 @@ class MainActivity : ComponentActivity() {
             intent.putExtra("CAPTION_BAR_HEIGHT", captionBarHeight!!)
             intent.setClass(this@MainActivity, SurfaceService::class.java)
             startService(intent)
+            finish()
         }
     }
 
