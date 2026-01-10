@@ -15,7 +15,6 @@
  */
 
 package android.hardware.input.common;
-
 /**
  * Constants that identify each individual axis of a motion event.
  * Each value represents a bit position. The user is expected to manually shift
@@ -384,4 +383,6 @@ enum Axis {
      * The interpretation of a generic axis is device-specific.
      */
     GENERIC_16 = 47,
+
+    CAPTION_BAR_HEIGHT = 48,
 }

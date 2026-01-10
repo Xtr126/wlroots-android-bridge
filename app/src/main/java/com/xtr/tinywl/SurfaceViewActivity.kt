@@ -30,6 +30,7 @@ class SurfaceViewActivity : ComponentActivity() {
 
     lateinit var bundle: SurfaceViewActivityBundle
     val xdgTopLevel get() = bundle.xdgTopLevel
+    private lateinit var captionBarHeightReciever: (Int) -> Unit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,7 +131,7 @@ class SurfaceViewActivity : ComponentActivity() {
 
             val captionBarHeight = WindowInsets.captionBar
                 .getTop(LocalDensity.current)
-
+            captionBarHeightReciever(captionBarHeight)
             ExternalSurfaceWithTopCaption(xdgTopLevel.title ?: "", leftCaptionBarInset, captionBarHeight)
         }
 
@@ -144,6 +145,7 @@ class SurfaceViewActivity : ComponentActivity() {
 
             override fun onInputQueueCreated(queue: InputQueue) {
                 nativePtr = nativeOnInputQueueCreated(queue, xdgTopLevel.nativePtr)
+                captionBarHeightReciever = { captionBarHeight: Int -> nativeOnCaptionBarHeightRecieved(captionBarHeight, nativePtr) }
             }
 
             override fun onInputQueueDestroyed(queue: InputQueue) {

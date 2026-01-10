@@ -6,6 +6,7 @@
 #include <aidl/tinywl/ITinywlInput.h>
 #include <aidl/android/hardware/input/common/MotionEvent.h>
 #include <aidl/com/android/server/inputflinger/KeyEvent.h>
+#include "aidl/android/hardware/input/common/Axis.h"
 
 using namespace aidl::tinywl;
 using namespace aidl::android::hardware::input::common;
@@ -121,6 +122,7 @@ static std::shared_ptr<ITinywlInput> callback = nullptr;
 
 struct poll_source {
     long nativePtr = -1;
+    int captionBarHeight = 0;
     // When non-NULL, this is the input queue from which the app will
     // receive user input events.
     AInputQueue *inputQueue = nullptr;
@@ -141,6 +143,9 @@ static int ALooper_callback(int fd, int events, void* data){
 
         if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
             MotionEvent motionEvent = MotionEvent_fromAInputEvent(event);
+            for (auto &coords: motionEvent.pointerCoords) {
+                PointerCoords_setAxisValue(coords, static_cast<int32_t>(Axis::CAPTION_BAR_HEIGHT), (float)pPollSource->captionBarHeight);
+            }
             callback->onMotionEvent(motionEvent, pPollSource->nativePtr, &handled);
         }
         else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
@@ -174,6 +179,13 @@ void OnInputQueueDestroyed(JNIEnv *env, jclass, jlong native_ptr) {
     delete pPollSource;
 }
 
+void OnCaptionBarHeightRecieved(JNIEnv *env, jclass clazz,
+                                jint caption_bar_height,
+                                jlong native_ptr) {
+    auto *pPollSource = (poll_source*)native_ptr;
+    pPollSource->captionBarHeight = caption_bar_height;
+}
+
 template <typename T, size_t N>
 char (&ArraySizeHelper(T (&array)[N]))[N];  // NOLINT(readability/casting)
 
@@ -202,6 +214,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
                     reinterpret_cast<void *>(OnInputBinderReceived)},
             {"nativeOnInputQueueCreated", "(Landroid/view/InputQueue;J)J", reinterpret_cast<void*>(OnInputQueueCreated)},
             {"nativeOnInputQueueDestroyed", "(J)V", reinterpret_cast<void*>(OnInputQueueDestroyed)},
+            {"nativeOnCaptionBarHeightRecieved", "(IJ)V", reinterpret_cast<void*>(OnCaptionBarHeightRecieved)},
     };
     int rc = env->RegisterNatives(c, methods, arraysize(methods));
     if (rc != JNI_OK) return rc;

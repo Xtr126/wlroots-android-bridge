@@ -12,6 +12,7 @@ import kotlin.system.exitProcess
 
 external fun nativeInputBinderReceived(binder: IBinder)
 external fun nativeOnInputQueueCreated(queue: InputQueue, nativePtr: Long): Long
+external fun nativeOnCaptionBarHeightRecieved(captionBarHeight: Int, nativePtr: Long)
 external fun nativeOnInputQueueDestroyed(nativePtr: Long)
 
 class SurfaceService : Service() {
@@ -54,9 +55,9 @@ class SurfaceService : Service() {
             startActivity(intent, ActivityOptions.makeBasic().apply {
                 setLaunchBounds(Rect().apply {
                     left = geoBox.x                     // left = same as x
-                    top = geoBox.y - captionBarHeight                    // top  = same as y
+                    top = geoBox.y + captionBarHeight                    // top  = same as y
                     right = geoBox.x + geoBox.width - 1     // right: exclusive-end minus 1 -> inclusive-end
-                    bottom = geoBox.y + geoBox.height - 1     // bottom: exclusive-end minus 1 -> inclusive-end
+                    bottom = geoBox.y + geoBox.height + captionBarHeight - 1     // bottom: exclusive-end minus 1 -> inclusive-end
                 })
             }.toBundle())
         }
