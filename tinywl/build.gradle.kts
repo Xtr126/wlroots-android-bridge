@@ -72,8 +72,8 @@ android {
     }
     buildFeatures.aidl = true
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     externalNativeBuild {
         cmake {
@@ -83,9 +83,6 @@ android {
     }
 
     ndkVersion = "28.0.13004108"
-    kotlinOptions {
-        jvmTarget = "11"
-    }
 }
 
 dependencies {
@@ -265,7 +262,7 @@ abstract class AidlCompileNdk : NonIncrementalTask() {
 
     abstract class AidlCompileRunnable : ProfileAwareWorkAction<AidlCompileRunnable.Params>() {
 
-        abstract class Params: Parameters() {
+        abstract class Params: ProfileAwareWorkAction.Parameters() {
             abstract val aidlExecutable: RegularFileProperty
             abstract val frameworkLocation: DirectoryProperty
             abstract val importFolders: ConfigurableFileCollection
@@ -365,7 +362,7 @@ object AidlProcessorNdk {
         importFolders: Iterable<File>,
         sourceOutputDir: File,
         packagedOutputDir: File?,
-        packagedList: MutableCollection<String?>?,
+        packagedList: List<String>?,
         dependencyFileProcessor: DependencyFileProcessor,
         processExecutor: ProcessExecutor,
         processOutputHandler: ProcessOutputHandler,
