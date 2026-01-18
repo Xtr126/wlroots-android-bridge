@@ -57,7 +57,7 @@ class SurfaceService : Service() {
                     left = geoBox.x                     // left = same as x
                     top = geoBox.y + captionBarHeight                    // top  = same as y
                     right = geoBox.x + geoBox.width - 1     // right: exclusive-end minus 1 -> inclusive-end
-                    bottom = geoBox.y + geoBox.height + captionBarHeight - 1     // bottom: exclusive-end minus 1 -> inclusive-end
+                    bottom = geoBox.y + captionBarHeight + geoBox.height + captionBarHeight - 1     // bottom: exclusive-end minus 1 -> inclusive-end
                 })
             }.toBundle())
         }
