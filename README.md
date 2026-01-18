@@ -1,24 +1,22 @@
-# Why?
-Whilst other projects for running wayland and X11 applications on Android already exist, this has proper GPU acceleration and multi window integration.  
+# Overview
+This is an attempt at an wayland compositor for Android with proper GPU acceleration and multi-window integration. Even if other projects for running wayland and X11 applications on Android already exist, they are flawed due to having to support proprietary Android drivers. 
 Those projects use CPU write/read usage flags for buffers and workarounds to get around limitations of using proprietary Android drivers.  
-[tinywl-ANativeWindow](https://github.com/Xtr126/tinywl-ANativeWindow) keeps the buffer entirely in GPU for the whole process of rendering/compositing and presenting to display, which is possible with open source mesa drivers.  
-It uses gralloc handle from minigbm/gbm gralloc headers to extract buffer attributes.  
-Proprietary Android drivers may have their own gralloc instead of minigbm/gbm which makes that almost impossible.  
-And then those other projects again use OpenGL ES shaders/drawing commands or Vulkan swapchains to render pixels from the buffer onto egl native window surface which submits the buffer to buffer queue of Android Surface.  
-This uses new SurfaceControl/SurfaceTransaction APIs (introduced in APIs 29, 33, 34 and 36) to submit GPU memory buffers to SurfaceFlinger for presentation, avoiding use of EGL/Vulkan.      
-It uses a zero-copy rendering path - client texture is rendered onto a GPU memory buffer allocated by minigbm/gbm gralloc which is then submitted for presenting to display by SurfaceFlinger, supporting hardware overlays (direct scanout) and GPU sampling by Android.  
-GPU acceleration for wlroots gles2/vulkan (either works) renderer is provided by mesa in termux (iris and Intel vulkan drivers are confirmed to work).   
-Therefore performance logically should be within margin of error of the performance in the case of wayland applications running natively on desktop Linux on the exact same hardware.  
-Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly on supported hardware even though Android itself does not support desktop OpenGL.
+We keeps the buffer entirely in GPU for the whole process of rendering/compositing and presenting to display.  
+This is made possible by a clever trick I discovered - using gralloc handle from open source minigbm/gbm gralloc headers to extract buffer attributes and import buffer into wlroots.    
+This doesn't again use OpenGL ES shaders/drawing commands or Vulkan swapchains to render pixels from the buffer onto egl native window surface which submits the buffer to buffer queue of Android Surface, instead uses new SurfaceControl/SurfaceTransaction APIs (introduced in APIs 29, 33, 34 and 36) to submit memory buffers in GPU directly to SurfaceFlinger for presentation, avoiding use of EGL/Vulkan.      
+A zero-copy rendering path - client texture is rendered onto a GPU memory buffer allocated by minigbm/gbm gralloc which is then submitted for presenting to display by SurfaceFlinger, supporting hardware overlays (direct scanout) and GPU compositing/sampling operations by Android.  
+GPU acceleration for wlroots gles2/vulkan (either one works) renderer works using mesa open source drivers (currently tested with iris on Intel GPU).   
 
-# How it works
-* A service in the app receives IBinder objects from a bundle when it recieves an intent by Tinywl app_process, then it starts a new Activity and callbacks to TinywlMainService.cpp AIDL service (using binder) as soon as the surface is created. 
+All in all, this means that performance can be within margin of error as if the same wayland applications ran natively on desktop Linux with similar hardware.  
+Notably, Vulkan 1.4 and desktop OpenGL 4.6 works flawlessly (tested on Intel GPUs) even though Android itself does not support desktop OpenGL.
+
+# Client application (Android/Kotlin) and wayland server/compositor architecture
+* A service in the app receives IBinder objects from a bundle when it recieves an intent by Tinywl app_process, then it starts a new Activity and callbacks to TinywlMainService C++ AIDL service (running in labwc) using binder IPC, as soon as the surface is created. 
+* `tinywl` module has kotlin code that runs in termux env (app_process). It takes care of launching the app and receiving binder from NDK AIDL service implementation in native code.
+* Termux handles the huge amount of dependencies of wlroots/mesa/wayland for us.
+* It has a wlr_allocator implementation that uses AHardwareBuffers internally, so the tinywl compositor internally uses Android's minigbm gralloc allocated buffers.
+* Each wayland client's texture is rendered onto a buffer, which is then presented on-screen using ASurfaceTransaction_setBuffer for each Window.
 * [TermuxAm](https://github.com/termux/TermuxAm/) is modified and used as a module to launch the activity of our app from app_process with intent containing bundle with IBinder AIDL callback object obtained from AIBinder in C++ code.
-* `tinywl` module has the code that runs in termux as a cli application in external process (app_process). It has an entry point like a standalone Java application called from cli with args. It takes care of launching the app and receiving binder from NDK AIDL service implementation in native code.
-* tinywl.c/libtinywl.so built with the app is just a placeholder, libtinywl.so from https://github.com/Xtr126/tinywl-ANativeWindow is used instead.
-* Termux is used since it handles the dependencies of wlroots/mesa/wayland for us.
-* It has a wlr_allocator implementation that uses AHardwareBuffers internally, so the tinywl compositor internally uses minigbm gralloc allocated buffers.
-* Each wayland client's texture is rendered onto a buffer, which is then presented on-screen using ASurfaceTransaction_setBuffer.
 
 ## Roadmap
 
@@ -31,7 +29,7 @@ Furthermore, with this Vulkan 1.4 and desktop OpenGL 4.6 should work flawlessly 
     - [ ] Touchscreen
     - [ ] Stylus
     - [ ] Gamepads
-- [ ] LXC/chroot integration
+- [x] LXC/chroot integration
 
 # Build 
 Must have app installed on-device for linking against shared libraries at build time.
@@ -43,15 +41,15 @@ Must have app installed on-device for linking against shared libraries at build 
     
 ## Building the app
 
-    # Run this before gradle sync
+    # You might need to run this before gradle sync
     ./gradlew compileDebugAidl
 
     ./gradlew assembleDebug
 
 # Usage
 Install the Android app (only source code is available in this repo).  
-Install wlroots and mesa packages from [Xtr126/termux-packages](https://github.com/Xtr126/termux-packages/releases/tag/wlroots-0.18).  
-Then run the following command in tinywl-ANativeWindow directory (after building).
+Install wlroots and mesa packages from [Xtr126/termux-packages](https://github.com/Xtr126/termux-packages/releases/).  
+Then run the following command in labwc-android/src/android directory (after building).
 
     sh start.sh 
 
